@@ -1,0 +1,6 @@
+start - Primero te saludo.
+rebus - ¡Te desafío!
+palindromo - Para leer para ambos lados.
+video - Para ver charlas del festival.
+help - Puedo intentar ayudarte...
+info - Puedo enviarte más información.

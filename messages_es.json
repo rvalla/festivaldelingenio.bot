@@ -1,0 +1,13 @@
+{
+	"bot_name": "Festival del Ingenio Bot",
+	"hello": "Hola, soy el bot del <b>Festival del Ingenio</b>.\n¡Espero que te diviertas!",
+	"hello2": "Si necesitás ayuda podés mandarme /help. También podés mandarme /info si no sabés bien quién soy.",
+	"palindromo": "Elegí el siguiente palíndromo para vos:",
+	"wrong": "Si querés charlar en el festival hay un montón de gente macanuda. Yo entiendo comandos nomás...",
+	"good_answer": "¡Correcto!",
+	"bad_answer": "No es la respuesta correcta...",
+	"cancel": "Queda cancelado el desafío...",
+	"wrong_cancel": "No hay nada que cancelar che...",
+	"end_challenge": "Doy por terminado el desafío. ¡La seguimos después!",
+	"error": "Algo salió mal... ¡Qué vergüenza!"
+}
