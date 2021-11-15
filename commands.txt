@@ -1,5 +1,6 @@
 start - Primero te saludo.
 rebus - ¡Te desafío!
+adivinanza - ¡Te desafío!
 palindromo - Para leer para ambos lados.
 video - Para ver charlas del festival.
 help - Puedo intentar ayudarte...

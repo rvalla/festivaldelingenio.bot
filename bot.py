@@ -9,7 +9,8 @@ config = js.load(open("config.json")) #The configuration .json file (token inclu
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
 TRY1 = range(1) #Conversation states...
-rebus_keys = ["words","path","solution","hint"]
+rebus_keys = ["type", "words","path","solution","hint"]
+adivinanza_keys = ["type", "solution_type","type_category","statement","solution","hint"]
 attempts_limit = 4
 
 #Starting the chat with a new user...
@@ -19,29 +20,38 @@ def start(update, context):
 	context.bot.send_message(chat_id=id, text=msg.get_message("hello"), parse_mode=ParseMode.HTML)
 	context.bot.send_message(chat_id=id, text=msg.get_message("hello2"), parse_mode=ParseMode.HTML)
 
-#Starting a rebus challenge...
+#Starting an adivinanza challenge...
+def start_adivinanza(update, context):
+	id = update.effective_chat.id
+	logging.info(hide_id(id) + " started adivinanza challenge...")
+	load_challenge(context.user_data, ass.get_adivinanza_data(), adivinanza_keys)
+	context.bot.send_message(chat_id=id, text=msg.get_message("start_challenge"), parse_mode=ParseMode.HTML)
+	context.bot.send_message(chat_id=id, text=msg.build_adivinanza_message(context.user_data["solution_type"], context.user_data["statement"]), parse_mode=ParseMode.HTML)
+	return TRY1
+
+#Starting rebus challenge...
 def start_rebus(update, context):
 	id = update.effective_chat.id
 	logging.info(hide_id(id) + " started rebus challenge...")
-	print("hola")
 	load_challenge(context.user_data, ass.get_rebus_data(), rebus_keys)
+	context.bot.send_message(chat_id=id, text=msg.get_message("start_challenge"), parse_mode=ParseMode.HTML)
 	context.bot.send_message(chat_id=id, text=msg.build_rebus_message(context.user_data["words"]), parse_mode=ParseMode.HTML)
 	try:
 		logging.info("Sending rebus image now..")
 		context.bot.send_photo(chat_id=id, photo=ass.get_rebus_image(context.user_data["path"]))
+		return TRY1
 	except:
 		logging.info("Error: It was imposible to send the image")
 		context.bot.send_message(chat_id=id, text=msg.get_message("error"), parse_mode=ParseMode.HTML)
-	return TRY1
+		return ConversationHandler.END
 
 #Loading rebus data to CallbackContext
 def load_challenge(user_data, rebus, keys):
-	data = rebus.split(",")
+	data = rebus.split(";")
 	for r, k in zip(data, keys):
 		user_data[k] = r
 	user_data["attempts"] = 0
 	user_data["saw_hint"] = False
-	user_data["type"] = "rebus"
 
 def check_try(update, context):
 	if is_correct_answer(update.message.text, context.user_data["solution"]):
@@ -68,7 +78,7 @@ def is_correct_answer(text, solution):
 		return False
 
 def send_congrats(update, context):
-	update.message.reply_text(msg.build_congrats_message("good_answer", context.user_data["type"]), reply_markup=reply)
+	update.message.reply_text(msg.build_congrats_message("good_answer", context.user_data["type"]))
 	context.user_data.clear()
 
 def send_hint(update, context):
@@ -143,7 +153,7 @@ def hide_id(id):
 
 def build_conversation_handler():
 	handler = ConversationHandler(
-		entry_points=[CommandHandler("rebus", start_rebus)],
+		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("adivinanza", start_adivinanza)],
 		states={TRY1:[CommandHandler("cancel", end_challenge),
 					MessageHandler(Filters.text, check_try),
 					CallbackQueryHandler(button_click)]},

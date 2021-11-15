@@ -13,10 +13,15 @@ class Messages():
 		return "<i>" + m + "</i>"
 
 	def build_rebus_message(self, w):
-		if int(w) > 1:
-			m = "<b>REBÚS:</b> " + w + " palabras"
-		else:
+		if w == "1":
 			m = "<b>REBÚS:</b> " + w + " palabra"
+		else:
+			m = "<b>REBÚS:</b> " + w + " palabras"
+		return m
+
+	def build_adivinanza_message(self, t, statement):
+		m = "<b>ADIVINANZA:</b> " + t + "\n\n"
+		m += "<i>" + statement + "</i>"
 		return m
 
 	def build_hint_message(self, hint):
@@ -24,13 +29,13 @@ class Messages():
 		return m
 
 	def build_congrats_message(self, solution, type):
-		m = self.get_message["good_answer"] + "\n\n"
+		m = self.get_message("good_answer") + "\n\n"
 		m += "¿Otro /" + type + "?"
 		return m
 
 	def build_end_challenge_message(self, solution, type):
-		m = self.get_message["end_challenge"] + "\n\n"
-		m += "¿Otro /" + type + "?"
+		m = self.get_message("end_challenge") + "\n\n"
+		m += "¿Quérés seguir?: /" + type
 		return m
 
 	def build_solution_message(self, solution, type):
