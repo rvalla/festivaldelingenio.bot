@@ -1,4 +1,4 @@
-![logo](https://gitlab.com/rodrigovalla/festivaldelingeniobot/-/raw/themoststable/public/assets/img/icon_64.png)
+![logo](https://gitlab.com/rodrigovalla/festivaldelingeniobot/-/raw/themoststable/assets/img/icon_64.png)
 
 # Festival del Ingenio Bot: changelog
 
