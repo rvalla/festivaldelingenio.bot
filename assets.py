@@ -9,6 +9,7 @@ class Assets():
 		self.rebuses = open("assets/img/rebuses/rebuses.csv").readlines()[1:]
 		self.adivinanzas = open("assets/text/adivinanzas.csv").readlines()[1:]
 		self.palindromos = open("assets/text/palindromos.txt").readlines()
+		self.stickers_ids = self.build_sticker_matrix("assets/text/stickers.csv")
 		self.videos = open("assets/videos.csv").readlines()[1:]
 
 	def get_rebus_data(self):
@@ -25,3 +26,25 @@ class Assets():
 
 	def get_video_data(self):
 		return rd.choice(self.videos)
+
+	def get_sticker_id(self, code):
+		return rd.choice(self.stickers_ids[code])
+
+	def build_sticker_matrix(self, path):
+		source = open(path).readlines()[1:]
+		victory = []
+		hint = []
+		loose = []
+		for s in source:
+			data = s.split(";")
+			if int(data[3]) == 0:
+				victory.append(data[1])
+			elif int(data[3]) == 1:
+				hint.append(data[1])
+			elif int(data[3]) == 2:
+				loose.append(data[1])
+		result = []
+		result.append(victory)
+		result.append(hint)
+		result.append(loose)
+		return result

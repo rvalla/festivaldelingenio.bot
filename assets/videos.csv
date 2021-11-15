@@ -1,3 +1,12 @@
-festival,category,author,title,about,url
-11º,Deportes,Diego Pokorski,Números hechos pelota,Deconstruyendo las estadísticas deportivas,https://youtu.be/uVzp7askYm0
-11º,Acertijos,Jeanette Shakalli,Rompecabezas con palillos de dientes,Una recolección de acertijos que te pondrán a pensar sin pincharte,https://youtu.be/ryTDhqdvN5Y
+festival;category;author;title;about;url
+11º;Deportes;Diego Pokorski;Números hechos pelota;Deconstruyendo las estadísticas deportivas.;https://youtu.be/uVzp7askYm0
+11º;Acertijos;Jeanette Shakalli;Rompecabezas con palillos de dientes;Una recolección de acertijos que te pondrán a pensar sin pincharte.;https://youtu.be/ryTDhqdvN5Y
+10º;Ciencia;Gustavo Piñeiro;Una difícil elección;La paradoja de Newcomb; o los riesgos de prever el futuro en un mundo de libre albedrío.;https://youtu.be/0NDH_QHFoEo
+10º;Ciencia;Claudio Sánchez;Matemática en el siglo XXXI;Un recorrido por las muchas curiosidades, acertijos y paradojas numéricas de la serie Futurama.;https://youtu.be/3eUgeedmcQg
+10º;Ciencia;Daniel Grimaldi;Las reglas de la vida;Cual 'dioses' de la estética, vamos a generar resultados visuales deslumbrantes jugando con unas pocas pautas sencillas.;https://youtu.be/pJ22N-x4oas
+10º;Historia;Patricia Boero Ricardi;Juegos medievales de tablero;Su origen histórico y su fabricación artesanal, en un recorrido lúdico-cultural apasionante.;https://youtu.be/Vg0vzzolPZ8
+10º;Acertijos;Esteban Grinbank y Claudio Meller;Comercio interestelar;Los productos y las marcas de todos los días... vistos con ojos de extraterrestre.;https://youtu.be/-Q7UZMcDYrM
+4º;Acertijos;Pablo Coll;Una nueva mirada a problemas clásicos;El problema del pibe que espera el tren y se toma el primero que viene, el medir el tiempo con relojes de arena, o tal vez con velas, o el de armar un rectángulo con todos cuadrados diferentes. Todos, algunos o ninguno de estos problemas o de otros van a ser tratados en esta charla, desde una perspectiva novedosa, o tal vez no tanto.;https://youtu.be/FGvJHmEg4U0
+8º;Acertijos;Pedro Casado;El cubo mágico;Su historia, los métodos de resolución y las competencias mundiales, contados en primera persona por el máximo velocista argentino.;https://youtu.be/Kd6sZysO82o
+8º;Música;Rodrigo Valla;El juego del ruido;Mientras los discos de vinilo vuelven a estar de moda surge una nueva batalla entre lo analógico y lo digital. Ganar o perder da igual, siempre y cuando logremos hacerla sonar...;https://youtu.be/kqW_jaKNZB0
+7º;Curiosidades;Alfredo Fontana;Simples y triples;El aristócrata inglés John Montagu, IV conde de Sandwich, le gustaba comer sanguches mientras jugaba a las cartas, para no interrumpir el juego; pero nunca se le ocurrió jugar a losa sanguches con las cartas.;https://youtu.be/8c5DOH6WL_U
