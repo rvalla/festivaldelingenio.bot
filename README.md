@@ -15,10 +15,31 @@ some tests. Stay tuned!
 Here you can see the list of available commands. Some of them allow you to pass parameters.
 
 - **/start**: returns simply a greeting.  
-- **/rebuses**:
-- **/palindromos**:
-- **/video**:
-- **/help**:
+- **/rebus**: to start a *rebus challenge*.
+- **/adivinanza**: to start an *adivinanza challenge*.
+- **/palindromo**: sends a palíndromo.
+- **/video**: share a video from the Youtube chanel.
+- **/help**: obviously to help.
+- **/info**: to share social networks.
+
+## running the code
+
+Note that you will need a *config.json* file on root which includes the bot's mandatory token to run this software.
+Currently *token* (provided by [@BotFather](https://t.me/BotFather) and *logging* (info, debugging or persistent)
+are needed:
+
+```
+{
+	"bot_name": "Festival del Ingenio Bot",
+	"date": "2021-11-14",
+	"username": "festivaldelingenio_bot",
+	"admin_id": "A mistery",
+	"link": "https://t.me/festivaldelingenio_bot",
+	"token": "I won't tell you my token",
+	"logging": "info",
+}
+
+```
 
 ## standing upon the shoulders of giants
 
