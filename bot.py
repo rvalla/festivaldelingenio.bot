@@ -11,7 +11,9 @@ ass = Assets() #The class to access the different persistent assets...
 TRY1 = range(1) #Conversation states...
 rebus_keys = ["type", "words","path","solution","hint"]
 adivinanza_keys = ["type", "solution_type","type_category","statement","solution","hint"]
-attempts_limit = 4
+attempts_limit = 2
+vowelsa, vowelsb = "áéíóúü", "aeiouu"
+translation = str.maketrans(vowelsa, vowelsb)
 
 #Starting the chat with a new user...
 def start(update, context):
@@ -68,31 +70,43 @@ def check_try(update, context):
 			reply = InlineKeyboardMarkup(keyboard)
 			update.message.reply_text(msg.get_message("bad_answer"),reply_markup=reply)
 		else:
+			update.message.reply_sticker(ass.get_sticker_id(2))
 			end_challenge(update, context)
 			return ConversationHandler.END
 
 def is_correct_answer(text, solution):
-	if text.lower() == solution:
-		return True
-	else:
-		return False
+	s = text.lower().translate(translation).split(" ")
+	is_correct = False
+	for w in s:
+		if w == solution:
+			is_correct = True
+	return is_correct
 
 def send_congrats(update, context):
+	update.message.reply_sticker(ass.get_sticker_id(0))
 	update.message.reply_text(msg.build_congrats_message("good_answer", context.user_data["type"]))
 	context.user_data.clear()
 
 def send_hint(update, context):
 	m = msg.build_hint_message(context.user_data["hint"])
 	context.bot.send_message(chat_id=update.effective_chat.id, text=m, parse_mode=ParseMode.HTML)
+	context.bot.send_sticker(chat_id=update.effective_chat.id, sticker=ass.get_sticker_id(1))
 	context.user_data["saw_hint"] = True
 
 def send_solution(update, context):
 	m = msg.build_solution_message(context.user_data["solution"], context.user_data["type"])
 	context.bot.send_message(chat_id=update.effective_chat.id, text=m, parse_mode=ParseMode.HTML)
+	context.bot.send_sticker(chat_id=update.effective_chat.id, sticker=ass.get_sticker_id(1))
 	context.user_data.clear()
 
 def end_challenge(update, context):
 	m = msg.build_end_challenge_message("end_challenge", context.user_data["type"])
+	context.bot.send_message(chat_id=update.effective_chat.id, text=m, parse_mode=ParseMode.HTML)
+	context.user_data.clear()
+	return ConversationHandler.END
+
+def cancel_challenge(update, context):
+	m = msg.get_message("end_challenge")
 	context.bot.send_message(chat_id=update.effective_chat.id, text=m, parse_mode=ParseMode.HTML)
 	context.user_data.clear()
 	return ConversationHandler.END
@@ -154,11 +168,13 @@ def hide_id(id):
 def build_conversation_handler():
 	handler = ConversationHandler(
 		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("adivinanza", start_adivinanza)],
-		states={TRY1:[CommandHandler("cancel", end_challenge),
-					MessageHandler(Filters.text, check_try),
+		states={TRY1:[MessageHandler(Filters.text & ~Filters.command, check_try),
 					CallbackQueryHandler(button_click)]},
-				fallbacks=[])
+				fallbacks=[MessageHandler(Filters.command, cancel_challenge)])
 	return handler
+
+def print_sticker_id(update,context):
+	print(update.message.sticker.file_id)
 
 #Configuring logging and getting ready to work...
 def main():
@@ -172,13 +188,14 @@ def main():
 	updater = Updater(config["token"], request_kwargs={'read_timeout': 5, 'connect_timeout': 5})
 	dp = updater.dispatcher
 	#dp.add_error_handler(error_notification)
-	dp.add_handler(CommandHandler("start", start))
-	dp.add_handler(CommandHandler("palindromo", send_palindromo))
-	dp.add_handler(CommandHandler("video", send_video))
-	dp.add_handler(CommandHandler("info", print_info))
-	dp.add_handler(CommandHandler("help", print_help))
-	dp.add_handler(build_conversation_handler())
-	dp.add_handler(MessageHandler(Filters.text, wrong_message))
+	dp.add_handler(CommandHandler("start", start), group=2)
+	dp.add_handler(CommandHandler("palindromo", send_palindromo), group=2)
+	dp.add_handler(CommandHandler("video", send_video), group=2)
+	dp.add_handler(CommandHandler("info", print_info), group=2)
+	dp.add_handler(CommandHandler("help", print_help), group=2)
+	dp.add_handler(build_conversation_handler(), group=1)
+	dp.add_handler(MessageHandler(Filters.text, wrong_message), group=1)
+	dp.add_handler(MessageHandler(Filters.sticker, print_sticker_id), group=1)
 	dp.bot.send_message(chat_id=config["admin_id"], text="The bot is online!", parse_mode=ParseMode.HTML)
 	updater.start_polling(drop_pending_updates=True)
 	updater.idle()

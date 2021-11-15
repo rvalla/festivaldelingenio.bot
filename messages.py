@@ -20,7 +20,7 @@ class Messages():
 		return m
 
 	def build_adivinanza_message(self, t, statement):
-		m = "<b>ADIVINANZA:</b> " + t + "\n\n"
+		m = "<b>ADIVINANZA</b>\n\n"
 		m += "<i>" + statement + "</i>"
 		return m
 
@@ -30,21 +30,21 @@ class Messages():
 
 	def build_congrats_message(self, solution, type):
 		m = self.get_message("good_answer") + "\n\n"
-		m += "¿Otro /" + type + "?"
+		m += "¿Quérés seguir? Mandá /" + type
 		return m
 
 	def build_end_challenge_message(self, solution, type):
 		m = self.get_message("end_challenge") + "\n\n"
-		m += "¿Quérés seguir?: /" + type
+		m += "¿Quérés seguir? Mandá /" + type
 		return m
 
 	def build_solution_message(self, solution, type):
 		m = "<b>Solución:</b> " + solution + "\n\n"
-		m += "¿Otro /" + type + "?"
+		m += "¿Quérés seguir? Mandá /" + type
 		return m
 
 	def build_video_message(self, video_data):
-		data = video_data.split(",")
+		data = video_data.split(";")
 		m = "Del <b>" + data[0] + " Festival del Ingenio</b>, elegí la charla de " + \
 			"<b>" + data[2] + "</b>:" + "\n\n" + \
 			"<b><a href='" + data[5] + "'>" + data[3] + "</a></b>\n" + \
