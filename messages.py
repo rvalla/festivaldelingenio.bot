@@ -60,7 +60,7 @@ class Messages():
 
 	def build_help_message(self):
 		m = "Podés pedirme distintas cosas. Acá te dejo mis comandos más divertidos:\n\n" + \
-			"> Mandame /rebus para que te desafíe acá mismo\n" + \
+			"> Mandame /rebus o /adivinanza para que te desafíe acá mismo\n" + \
 			"> Mandame /palindromo para que te sorprenda con una oración que se lee al derecho y al revés\n" + \
 			"> Mandame /video si querés que comparta con vos un video de algunas de las charlas del festival"
 		return m

@@ -74,10 +74,11 @@ def check_try(update, context):
 			end_challenge(update, context)
 			return ConversationHandler.END
 
-def is_correct_answer(text, solution):
-	s = text.lower().translate(translation).split(" ")
+def is_correct_answer(message, solution):
+	input = message.lower().translate(translation).split(" ")
+	solution = solution.lower().translate(translation)
 	is_correct = False
-	for w in s:
+	for w in input:
 		if w == solution:
 			is_correct = True
 	return is_correct
@@ -173,9 +174,6 @@ def build_conversation_handler():
 				fallbacks=[MessageHandler(Filters.command, cancel_challenge)])
 	return handler
 
-def print_sticker_id(update,context):
-	print(update.message.sticker.file_id)
-
 #Configuring logging and getting ready to work...
 def main():
 	if config["logging"] == "persistent":
@@ -187,15 +185,14 @@ def main():
 		logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 	updater = Updater(config["token"], request_kwargs={'read_timeout': 5, 'connect_timeout': 5})
 	dp = updater.dispatcher
-	#dp.add_error_handler(error_notification)
+	dp.add_error_handler(error_notification)
 	dp.add_handler(CommandHandler("start", start), group=2)
 	dp.add_handler(CommandHandler("palindromo", send_palindromo), group=2)
 	dp.add_handler(CommandHandler("video", send_video), group=2)
 	dp.add_handler(CommandHandler("info", print_info), group=2)
 	dp.add_handler(CommandHandler("help", print_help), group=2)
 	dp.add_handler(build_conversation_handler(), group=1)
-	dp.add_handler(MessageHandler(Filters.text, wrong_message), group=1)
-	dp.add_handler(MessageHandler(Filters.sticker, print_sticker_id), group=1)
+	dp.add_handler(MessageHandler(Filters.text & ~Filters.command, wrong_message), group=1)
 	dp.bot.send_message(chat_id=config["admin_id"], text="The bot is online!", parse_mode=ParseMode.HTML)
 	updater.start_polling(drop_pending_updates=True)
 	updater.idle()
