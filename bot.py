@@ -8,11 +8,11 @@ from assets import Assets
 config = js.load(open("config.json")) #The configuration .json file (token included)
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
-TRY1 = range(1) #Conversation states...
-rebus_keys = ["type", "words","path","solution","hint"]
-adivinanza_keys = ["type", "solution_type","type_category","statement","solution","hint"]
-attempts_limit = 2
-vowelsa, vowelsb = "áéíóúü", "aeiouu"
+TRYING = range(1) #Conversation states...
+rebus_keys = ["type", "words","path","solution","hint"] #Keys to load rebus data...
+adivinanza_keys = ["type", "solution_type","type_category","statement","solution","hint"] #Keys to load adivinanza data...
+attempts_limit = 2 #Defining the number of attempts before ending a challenge...
+vowelsa, vowelsb = "áéíóúü", "aeiouu" #Mapping special characters to check sent solutions...
 translation = str.maketrans(vowelsa, vowelsb)
 
 #Starting the chat with a new user...
@@ -29,7 +29,7 @@ def start_adivinanza(update, context):
 	load_challenge(context.user_data, ass.get_adivinanza_data(), adivinanza_keys)
 	context.bot.send_message(chat_id=id, text=msg.get_message("start_challenge"), parse_mode=ParseMode.HTML)
 	context.bot.send_message(chat_id=id, text=msg.build_adivinanza_message(context.user_data["solution_type"], context.user_data["statement"]), parse_mode=ParseMode.HTML)
-	return TRY1
+	return TRYING
 
 #Starting rebus challenge...
 def start_rebus(update, context):
@@ -41,28 +41,29 @@ def start_rebus(update, context):
 	try:
 		logging.info("Sending rebus image now..")
 		context.bot.send_photo(chat_id=id, photo=ass.get_rebus_image(context.user_data["path"]))
-		return TRY1
+		return TRYING #Entering TRYING state if image was sent succesfully...
 	except:
 		logging.info("Error: It was imposible to send the image")
 		context.bot.send_message(chat_id=id, text=msg.get_message("error"), parse_mode=ParseMode.HTML)
-		return ConversationHandler.END
+		return ConversationHandler.END #Ending challenge if image was not sent...
 
-#Loading rebus data to CallbackContext
+#Loading challenge data to CallbackContext
 def load_challenge(user_data, rebus, keys):
 	data = rebus.split(";")
 	for r, k in zip(data, keys):
 		user_data[k] = r
-	user_data["attempts"] = 0
-	user_data["saw_hint"] = False
+	user_data["attempts"] = 0 #Saving number of attempsts...
+	user_data["saw_hint"] = False #A field to know if the user asded for a hint...
 
+#TRYING state check the answers sent by the user...
 def check_try(update, context):
 	if is_correct_answer(update.message.text, context.user_data["solution"]):
 		send_congrats(update, context)
-		return ConversationHandler.END
+		return ConversationHandler.END #Ending challenge after user succeded...
 	else:
 		if context.user_data["attempts"] < attempts_limit:
 			context.user_data["attempts"] += 1
-			if context.user_data["saw_hint"] == False:
+			if context.user_data["saw_hint"] == False: #Deciding what buttons to send...
 				keyboard = [[InlineKeyboardButton(text="Pista", callback_data="hint"),
 							InlineKeyboardButton(text="Solución", callback_data="solution")]]
 			else:
@@ -72,47 +73,54 @@ def check_try(update, context):
 		else:
 			update.message.reply_sticker(ass.get_sticker_id(2))
 			end_challenge(update, context)
-			return ConversationHandler.END
+			return ConversationHandler.END #Ending a challenge after attempts limit...
 
+#Checking if an answer is correct...
 def is_correct_answer(message, solution):
-	input = message.lower().translate(translation).split(" ")
-	solution = solution.lower().translate(translation)
+	input = message.lower().translate(translation).split(" ") #Al words sent by the user will be evaluated...
+	solution = solution.lower().translate(translation) #The strings to compare haven't got special characters...
 	is_correct = False
 	for w in input:
 		if w == solution:
 			is_correct = True
+			break
 	return is_correct
 
+#Sending congratulation message...
 def send_congrats(update, context):
 	update.message.reply_sticker(ass.get_sticker_id(0))
 	update.message.reply_text(msg.build_congrats_message("good_answer", context.user_data["type"]))
 	context.user_data.clear()
 
+#Sending the challenge's hint...
 def send_hint(update, context):
 	m = msg.build_hint_message(context.user_data["hint"])
 	context.bot.send_message(chat_id=update.effective_chat.id, text=m, parse_mode=ParseMode.HTML)
 	context.bot.send_sticker(chat_id=update.effective_chat.id, sticker=ass.get_sticker_id(1))
 	context.user_data["saw_hint"] = True
 
+#Sending the solution from a challenge...
 def send_solution(update, context):
 	m = msg.build_solution_message(context.user_data["solution"], context.user_data["type"])
 	context.bot.send_message(chat_id=update.effective_chat.id, text=m, parse_mode=ParseMode.HTML)
 	context.bot.send_sticker(chat_id=update.effective_chat.id, sticker=ass.get_sticker_id(1))
 	context.user_data.clear()
 
+#Ending a challenge...
 def end_challenge(update, context):
 	m = msg.build_end_challenge_message("end_challenge", context.user_data["type"])
 	context.bot.send_message(chat_id=update.effective_chat.id, text=m, parse_mode=ParseMode.HTML)
 	context.user_data.clear()
 	return ConversationHandler.END
 
+#Canceling the challenge without offering another one...
 def cancel_challenge(update, context):
 	m = msg.get_message("end_challenge")
 	context.bot.send_message(chat_id=update.effective_chat.id, text=m, parse_mode=ParseMode.HTML)
 	context.user_data.clear()
 	return ConversationHandler.END
 
-#Sendind a palindromo for the user...
+#Sending a palindromo for the user...
 def send_palindromo(update, context):
 	id = update.effective_chat.id
 	logging.info(hide_id(id) + " asked for a palindromo...")
@@ -143,6 +151,7 @@ def wrong_message(update, context):
 	logging.info(hide_id(id) + " intended to chat...")
 	context.bot.send_message(chat_id=id, text=msg.get_message("wrong"), parse_mode=ParseMode.HTML)
 
+#Deciding what function to trigger after a button click...
 def button_click(update, context):
 	query = update.callback_query
 	query.answer()
@@ -151,8 +160,6 @@ def button_click(update, context):
 	elif query.data == "solution":
 		send_solution(update, context)
 		return ConversationHandler.END
-	elif query.data == "end_challenge":
-		end_challenge(update, context)
 
 #Sending a message to bot admin when an error occur...
 def error_notification(update, context):
@@ -166,10 +173,11 @@ def hide_id(id):
 	s = str(id)
 	return "****" + s[len(s)-4:]
 
+#Building the conversation handler...
 def build_conversation_handler():
 	handler = ConversationHandler(
 		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("adivinanza", start_adivinanza)],
-		states={TRY1:[MessageHandler(Filters.text & ~Filters.command, check_try),
+		states={TRYING:[MessageHandler(Filters.text & ~Filters.command, check_try),
 					CallbackQueryHandler(button_click)]},
 				fallbacks=[MessageHandler(Filters.command, cancel_challenge)])
 	return handler

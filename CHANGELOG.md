@@ -4,7 +4,7 @@
 
 ## 2021-11-14: v0.1 alpha
 
-First steps setting the bot. Testing *conversationhandling* to build differente *challenges**.
+First steps setting the bot. Testing *conversationhandling* to build different *challenges**.
 
 Reach **Festival del Ingenio Bot** [here](https://t.me/festivaldelingeniobot_bot).
 Feel free to contact me by [mail](mailto:rodrigovalla@protonmail.ch) or reach me in
