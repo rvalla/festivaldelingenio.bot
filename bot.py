@@ -9,8 +9,8 @@ config = js.load(open("config.json")) #The configuration .json file (token inclu
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
 TRYING = range(1) #Conversation states...
-rebus_keys = ["type", "words","path","solution","hint"] #Keys to load rebus data...
-adivinanza_keys = ["type", "solution_type","type_category","statement","solution","hint"] #Keys to load adivinanza data...
+rebus_keys = ["type","words","solution","hint","file_id","path"] #Keys to load rebus data...
+acertijo_keys = ["type","words","solution_type","type_category","statement","solution","hint"] #Keys to load acertijo data...
 attempts_limit = 2 #Defining the number of attempts before ending a challenge...
 vowelsa, vowelsb = "áéíóúü", "aeiouu" #Mapping special characters to check sent solutions...
 translation = str.maketrans(vowelsa, vowelsb)
@@ -22,13 +22,13 @@ def start(update, context):
 	context.bot.send_message(chat_id=id, text=msg.get_message("hello"), parse_mode=ParseMode.HTML)
 	context.bot.send_message(chat_id=id, text=msg.get_message("hello2"), parse_mode=ParseMode.HTML)
 
-#Starting an adivinanza challenge...
-def start_adivinanza(update, context):
+#Starting an acertijo challenge...
+def start_acertijo(update, context):
 	id = update.effective_chat.id
-	logging.info(hide_id(id) + " started adivinanza challenge...")
-	load_challenge(context.user_data, ass.get_adivinanza_data(), adivinanza_keys)
+	logging.info(hide_id(id) + " started acertijo challenge...")
+	load_challenge(context.user_data, ass.get_acertijo_data(), acertijo_keys)
 	context.bot.send_message(chat_id=id, text=msg.get_message("start_challenge"), parse_mode=ParseMode.HTML)
-	context.bot.send_message(chat_id=id, text=msg.build_adivinanza_message(context.user_data["solution_type"], context.user_data["statement"]), parse_mode=ParseMode.HTML)
+	context.bot.send_message(chat_id=id, text=msg.build_acertijo_message(context.user_data["solution_type"], context.user_data["statement"]), parse_mode=ParseMode.HTML)
 	return TRYING
 
 #Starting rebus challenge...
@@ -40,7 +40,7 @@ def start_rebus(update, context):
 	context.bot.send_message(chat_id=id, text=msg.build_rebus_message(context.user_data["words"]), parse_mode=ParseMode.HTML)
 	try:
 		logging.info("Sending rebus image now..")
-		context.bot.send_photo(chat_id=id, photo=ass.get_rebus_image(context.user_data["path"]))
+		context.bot.send_photo(chat_id=id, photo=context.user_data["file_id"])
 		return TRYING #Entering TRYING state if image was sent succesfully...
 	except:
 		logging.info("Error: It was imposible to send the image")
@@ -57,7 +57,7 @@ def load_challenge(user_data, rebus, keys):
 
 #TRYING state check the answers sent by the user...
 def check_try(update, context):
-	if is_correct_answer(update.message.text, context.user_data["solution"]):
+	if is_correct_answer(update.message.text, context.user_data["solution"], int(context.user_data["words"])):
 		send_congrats(update, context)
 		return ConversationHandler.END #Ending challenge after user succeded...
 	else:
@@ -76,14 +76,19 @@ def check_try(update, context):
 			return ConversationHandler.END #Ending a challenge after attempts limit...
 
 #Checking if an answer is correct...
-def is_correct_answer(message, solution):
-	input = message.lower().translate(translation).split(" ") #Al words sent by the user will be evaluated...
+def is_correct_answer(message, solution, solution_words):
+	input = message.lower().translate(translation)
 	solution = solution.lower().translate(translation) #The strings to compare haven't got special characters...
 	is_correct = False
-	for w in input:
-		if w == solution:
+	if solution_words == 1:
+		input_w = input.split(" ") #Al words sent by the user will be evaluated...
+		for w in input_w:
+			if w == solution:
+				is_correct = True
+				break
+	else:
+		if input == solution:
 			is_correct = True
-			break
 	return is_correct
 
 #Sending congratulation message...
@@ -127,6 +132,28 @@ def send_palindromo(update, context):
 	context.bot.send_message(chat_id=id, text=msg.get_message("palindromo"), parse_mode=ParseMode.HTML)
 	context.bot.send_message(chat_id=id, text=msg.italic(ass.get_palindromo()), parse_mode=ParseMode.HTML)
 
+#Sending a reverse number...
+def send_reverse_number(update, context):
+	id = update.effective_chat.id
+	in_m = update.message.text.split(" ")
+	logging.info(hide_id(id) + " asked for a reverse number...")
+	if len(in_m) > 1:
+		try:
+			n = int(in_m[1])
+			data = ass.get_reverse_number(n).split(";")
+			m = msg.get_message("reverse_number") + "\n\n"
+			m += msg.bold(data[1])
+			context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+			context.bot.send_photo(chat_id=id, photo=data[2])
+		except:
+			context.bot.send_message(chat_id=id, text=msg.get_message("reverse_error"), parse_mode=ParseMode.HTML)
+	else:
+		data = ass.get_random_reverse_number().split(";")
+		m = msg.get_message("reverse_number") + "\n\n"
+		m += msg.bold(data[1])
+		context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+		context.bot.send_photo(chat_id=id, photo=data[2])
+
 #Sendind a video from the youtube chanel...
 def send_video(update, context):
 	id = update.effective_chat.id
@@ -168,6 +195,10 @@ def error_notification(update, context):
 	logging.info(m)
 	context.bot.send_message(chat_id=config["admin_id"], text=m, parse_mode=ParseMode.HTML)
 
+def print_file_id(update, context):
+	print("///////")
+	print(update.message.photo[0]["file_id"] + ";")
+
 #Hiding the first numbers of a chat id for the log...
 def hide_id(id):
 	s = str(id)
@@ -176,7 +207,7 @@ def hide_id(id):
 #Building the conversation handler...
 def build_conversation_handler():
 	handler = ConversationHandler(
-		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("adivinanza", start_adivinanza)],
+		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("acertijo", start_acertijo)],
 		states={TRYING:[MessageHandler(Filters.text & ~Filters.command, check_try),
 					CallbackQueryHandler(button_click)]},
 				fallbacks=[MessageHandler(Filters.command, cancel_challenge)])
@@ -193,14 +224,16 @@ def main():
 		logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 	updater = Updater(config["token"], request_kwargs={'read_timeout': 5, 'connect_timeout': 5})
 	dp = updater.dispatcher
-	dp.add_error_handler(error_notification)
+	#dp.add_error_handler(error_notification)
 	dp.add_handler(CommandHandler("start", start), group=2)
 	dp.add_handler(CommandHandler("palindromo", send_palindromo), group=2)
+	dp.add_handler(CommandHandler("reversible", send_reverse_number), group=2)
 	dp.add_handler(CommandHandler("video", send_video), group=2)
 	dp.add_handler(CommandHandler("info", print_info), group=2)
 	dp.add_handler(CommandHandler("help", print_help), group=2)
 	dp.add_handler(build_conversation_handler(), group=1)
 	dp.add_handler(MessageHandler(Filters.text & ~Filters.command, wrong_message), group=1)
+	dp.add_handler(MessageHandler(Filters.photo & ~Filters.command, print_file_id), group=1)
 	dp.bot.send_message(chat_id=config["admin_id"], text="The bot is online!", parse_mode=ParseMode.HTML)
 	updater.start_polling(drop_pending_updates=True)
 	updater.idle()

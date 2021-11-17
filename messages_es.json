@@ -3,6 +3,8 @@
 	"hello": "Hola, soy el bot del <b>Festival del Ingenio</b>.\n¡Espero que te diviertas!",
 	"hello2": "Si necesitás ayuda podés mandarme /help. También podés mandarme /info si no sabés bien quién soy.",
 	"palindromo": "Elegí el siguiente palíndromo para vos:",
+	"reverse_number": "Acá te mando un número escrito de forma reversible:",
+	"reverse_error": "No tengo solución para ese número",
 	"start_challenge": "Estoy listo para desafiarte...",
 	"wrong": "Si querés charlar en el festival hay un montón de gente macanuda. Yo entiendo comandos nomás...",
 	"good_answer": "¡Correcto!",

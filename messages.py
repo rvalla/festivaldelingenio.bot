@@ -14,6 +14,10 @@ class Messages():
 	def italic(self, m):
 		return "<i>" + m + "</i>"
 
+	#Formating message with html <b> tag...
+	def bold(self, m):
+		return "<b>" + m + "</b>"
+
 	#Building the message to start a rebus challenge...
 	def build_rebus_message(self, w):
 		if w == "1":
@@ -22,8 +26,8 @@ class Messages():
 			m = "<b>REBÚS:</b> " + w + " palabras"
 		return m
 
-	#Building the message to start an adivinanza challenge...
-	def build_adivinanza_message(self, t, statement):
+	#Building the message to start an acertijo challenge...
+	def build_acertijo_message(self, t, statement):
 		m = "<b>ADIVINANZA</b>\n\n"
 		m += "<i>" + statement + "</i>"
 		return m
@@ -65,13 +69,17 @@ class Messages():
 		m = "El <b>Festival del Ingenio</b> es un encuentro para aprender y divertirse con acertijos, juegos, " + \
 			"rompecabezas y magia. Lo hacemos para celebrar el ingenio de <b>Martin Gardner</b> y <b>Jaime Poniachik</b>. " + \
 			"Podés enterarte de todas las novedades del festival en <a href='https://www.instagram.com/festivaldelingenio/'>" + \
-			"Instagram</a>."
+			"Instagram</a>.\n\n" + \
+			"Mi contenido tiene varios autores: <b>Rodolfo Kurchan</b>, <b>Esteban Grinbank</b>.\n\n" + \
+			"Mi administrador es @rvalla, escribile si me encontrás algún problema."
+		print(m)
 		return m
 
 	#The message triggered with /help command...
 	def build_help_message(self):
 		m = "Podés pedirme distintas cosas. Acá te dejo mis comandos más divertidos:\n\n" + \
-			"> Mandame /rebus o /adivinanza para que te desafíe acá mismo\n" + \
+			"> Mandame /rebus o /acertijo para que te desafíe acá mismo\n" + \
 			"> Mandame /palindromo para que te sorprenda con una oración que se lee al derecho y al revés\n" + \
+			"> Mandame /reversible seguido de un número si querés ver un número escrito de manera reversible\n" + \
 			"> Mandame /video si querés que comparta con vos un video de algunas de las charlas del festival"
 		return m
