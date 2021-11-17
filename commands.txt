@@ -1,7 +1,8 @@
 start - Primero te saludo.
-rebus - ¡Te desafío!
-adivinanza - ¡Te desafío!
+rebus - Te desafío acá mismo...
+acertijo - Te desafío acá mismo...
 palindromo - Para leer para ambos lados.
+reversible - Te mando un número reversible.
 video - Para ver charlas del festival.
 help - Puedo intentar ayudarte...
 info - Puedo enviarte más información.

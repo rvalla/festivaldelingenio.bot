@@ -1,6 +1,8 @@
 config.json
 .DS_Store
 __pycache__
+svg
 rebuses
-adivinanzas.csv
+acertijos.csv
+reverse_numbers
 palindromos.txt

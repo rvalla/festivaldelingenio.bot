@@ -6,10 +6,11 @@ class Assets():
 
 	def __init__(self):
 		self.img_path = "assets/img/"
-		self.rebuses = open("assets/img/rebuses/rebuses.csv").readlines()[1:]
-		self.adivinanzas = open("assets/text/adivinanzas.csv").readlines()[1:]
+		self.rebuses = open("assets/data_rebuses.csv").readlines()[1:]
+		self.acertijos = open("assets/text/acertijos.csv").readlines()[1:]
 		self.palindromos = open("assets/text/palindromos.txt").readlines()
-		self.stickers_ids = self.build_sticker_matrix("assets/text/stickers.csv")
+		self.reverse_numbers = open("assets/data_reverse_numbers.csv").readlines()[1:]
+		self.stickers_ids = self.build_sticker_matrix("assets/stickers.csv")
 		self.videos = open("assets/videos.csv").readlines()[1:]
 
 	#Returning a text line from rebuses.csv database...
@@ -17,16 +18,23 @@ class Assets():
 		return rd.choice(self.rebuses)
 
 	#Returning the image from a rebus...
-	def get_rebus_image(self, path):
+	def open_rebus_image(self, path):
 		return open(path, "rb")
 
 	#Returning a line in adivinanzas.csv database...
-	def get_adivinanza_data(self):
-		return rd.choice(self.adivinanzas)
+	def get_acertijo_data(self):
+		return rd.choice(self.acertijos)
 
 	#Returning a random palindromo...
 	def get_palindromo(self):
 		return rd.choice(self.palindromos)
+
+	#Returning data from a reverse number...
+	def get_random_reverse_number(self):
+		return rd.choice(self.reverse_numbers)
+
+	def get_reverse_number(self, n):
+		return self.reverse_numbers[n-1]
 
 	#Returning a line in videos.csv database...
 	def get_video_data(self):
