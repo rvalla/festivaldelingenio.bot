@@ -27,7 +27,9 @@ class Assets():
 
 	#Returning a random palindromo...
 	def get_palindromo(self):
-		return rd.choice(self.palindromos)
+		m = rd.choice(self.palindromos)
+		m += m[::-1]
+		return m
 
 	#Returning data from a reverse number...
 	def get_random_reverse_number(self):

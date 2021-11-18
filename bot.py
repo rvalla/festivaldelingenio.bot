@@ -93,7 +93,8 @@ def is_correct_answer(message, solution, solution_words):
 
 #Sending congratulation message...
 def send_congrats(update, context):
-	update.message.reply_sticker(ass.get_sticker_id(0))
+	if context.user_data["saw_hint"] == False:
+		update.message.reply_sticker(ass.get_sticker_id(0))
 	update.message.reply_text(msg.build_congrats_message("good_answer", context.user_data["type"]))
 	context.user_data.clear()
 
@@ -108,7 +109,8 @@ def send_hint(update, context):
 def send_solution(update, context):
 	m = msg.build_solution_message(context.user_data["solution"], context.user_data["type"])
 	context.bot.send_message(chat_id=update.effective_chat.id, text=m, parse_mode=ParseMode.HTML)
-	context.bot.send_sticker(chat_id=update.effective_chat.id, sticker=ass.get_sticker_id(1))
+	if context.user_data["saw_hint"] == False:
+		context.bot.send_sticker(chat_id=update.effective_chat.id, sticker=ass.get_sticker_id(1))
 	context.user_data.clear()
 
 #Ending a challenge...
@@ -224,7 +226,7 @@ def main():
 		logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 	updater = Updater(config["token"], request_kwargs={'read_timeout': 5, 'connect_timeout': 5})
 	dp = updater.dispatcher
-	dp.add_error_handler(error_notification)
+	#dp.add_error_handler(error_notification)
 	dp.add_handler(CommandHandler("start", start), group=2)
 	dp.add_handler(CommandHandler("palindromo", send_palindromo), group=2)
 	dp.add_handler(CommandHandler("reversible", send_reverse_number), group=2)

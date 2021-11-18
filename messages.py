@@ -70,9 +70,9 @@ class Messages():
 			"rompecabezas y magia. Lo hacemos para celebrar el ingenio de <b>Martin Gardner</b> y <b>Jaime Poniachik</b>. " + \
 			"Podés enterarte de todas las novedades del festival en <a href='https://www.instagram.com/festivaldelingenio/'>" + \
 			"Instagram</a>.\n\n" + \
-			"Mi contenido tiene varios autores: <b>Rodolfo Kurchan</b>, <b>Esteban Grinbank</b>.\n\n" + \
+			"Mi contenido incluye algunos palíndromos y acertijos populares pero también contenido original de varios " + \
+			"autores: <b>Rodolfo Kurchan</b>, <b>Esteban Grinbank</b>.\n\n" + \
 			"Mi administrador es @rvalla, escribile si me encontrás algún problema."
-		print(m)
 		return m
 
 	#The message triggered with /help command...
