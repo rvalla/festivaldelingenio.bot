@@ -2,6 +2,14 @@
 
 # Festival del Ingenio Bot: changelog
 
+## 2021-11-18: v0.3 beta
+
+The structure of the **bot** is ready. Some of the changes and new features are:
+
+- **Challenges**: Now is possible to check answers of any number of words. Images for the challenges are
+called from telegram servers. The **bot** send stickers selecting them randomly from a categorized database.
+- **Commands**: You can send */reversible* command to obtain a reversible number.  
+
 ## 2021-11-14: v0.1 alpha
 
 First steps setting the bot. Testing *conversationhandling* to build different *challenges**.

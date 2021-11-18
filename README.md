@@ -16,7 +16,8 @@ Here you can see the list of available commands. Some of them allow you to pass 
 
 - **/start**: returns simply a greeting.  
 - **/rebus**: to start a *rebus challenge*.
-- **/adivinanza**: to start an *adivinanza challenge*.
+- **/acertijo**: to start an *acertijo challenge*.
+- **/reversible n**: to receive a reversible number *n* or a random one.
 - **/palindromo**: sends a palíndromo.
 - **/video**: share a video from the Youtube chanel.
 - **/help**: obviously to help.
