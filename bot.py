@@ -169,18 +169,15 @@ def send_video(update, context):
 #Using the bot to play a live game...
 def save_game_move(update, context):
 	id = update.effective_chat.id
-	fn = "Fulano"
-	ln = "DeTal"
-	try:
-		fn = update.effective_chat.first_name
-		ln = update.effective_chat.last_name
-	except:
-		error = "Problems when saving a game move with " + hide_id(id) + " name..."
-		bot.send_message(chat_id=config["admin_id"], text=error, parse_mode=ParseMode.HTML)
 	m = update.message.text.split(" ")
 	if len(m) == 2:
+		fn = update.effective_chat.first_name
+		ln = update.effective_chat.last_name
+		try:
+			name = fn + " " + ln
+		except:
+			name = fn
 		number = m[1]
-		name = fn + " " + ln
 		logging.info(hide_id(id) + " play a move in our game...")
 		gm.save_move(number, name, id)
 		context.bot.send_message(chat_id=id, text=msg.build_game_move_message(number, name), parse_mode=ParseMode.HTML)
