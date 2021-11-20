@@ -4,10 +4,12 @@ import traceback, logging
 import json as js
 from messages import Messages
 from assets import Assets
+from game import Game
 
 config = js.load(open("config.json")) #The configuration .json file (token included)
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
+gm = Game() #The class to let the users play some game...
 TRYING = range(1) #Conversation states...
 rebus_keys = ["type","words","solution","explanation","hint","file_id","path"] #Keys to load rebus data...
 acertijo_keys = ["type","words","solution_type","type_category","statement","solution","explanation","hint"] #Keys to load acertijo data...
@@ -100,17 +102,19 @@ def send_congrats(update, context):
 
 #Sending the challenge's hint...
 def send_hint(update, context):
+	id = update.effective_chat.id
 	m = msg.build_hint_message(context.user_data["hint"])
-	context.bot.send_message(chat_id=update.effective_chat.id, text=m, parse_mode=ParseMode.HTML)
-	context.bot.send_sticker(chat_id=update.effective_chat.id, sticker=ass.get_sticker_id(1))
+	context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(1))
 	context.user_data["saw_hint"] = True
 
 #Sending the solution from a challenge...
 def send_solution(update, context):
+	id = update.effective_chat.id
 	m = msg.build_solution_message(context.user_data["solution"], context.user_data["type"], context.user_data["explanation"])
-	context.bot.send_message(chat_id=update.effective_chat.id, text=m, parse_mode=ParseMode.HTML)
+	context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
 	if context.user_data["saw_hint"] == False:
-		context.bot.send_sticker(chat_id=update.effective_chat.id, sticker=ass.get_sticker_id(1))
+		context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(1))
 	context.user_data.clear()
 
 #Ending a challenge...
@@ -162,6 +166,44 @@ def send_video(update, context):
 	logging.info(hide_id(id) + " asked for a video...")
 	context.bot.send_message(chat_id=id, text=msg.build_video_message(ass.get_video_data()), parse_mode=ParseMode.HTML)
 
+#Using the bot to play a live game...
+def save_game_move(update, context):
+	id = update.effective_chat.id
+	fn = "Fulano"
+	ln = "DeTal"
+	try:
+		fn = update.effective_chat.first_name
+		ln = update.effective_chat.last_name
+	except:
+		error = "Problems when saving a game move with " + hide_id(id) + " name..."
+		bot.send_message(chat_id=config["admin_id"], text=error, parse_mode=ParseMode.HTML)
+	m = update.message.text.split(" ")
+	if len(m) == 2:
+		number = m[1]
+		name = fn + " " + ln
+		logging.info(hide_id(id) + " play a move in our game...")
+		gm.save_move(number, name, id)
+		context.bot.send_message(chat_id=id, text=msg.build_game_move_message(number, name), parse_mode=ParseMode.HTML)
+	else:
+		logging.info(hide_id(id) + " failed to play a move...")
+		context.bot.send_message(chat_id=id, text=msg.get_message("play_move_error"), parse_mode=ParseMode.HTML)
+
+def end_game(update, context):
+	id = update.effective_chat.id
+	m = update.message.text.split(" ")
+	if len(m) > 1 and m[1] == config["password"]:
+		number, winner, winner_id = gm.end_game()
+		logging.info(hide_id(id) + " ending a game round...")
+		context.bot.send_message(chat_id=id, text=msg.build_end_game_message(number, winner), parse_mode=ParseMode.HTML)
+		try:
+			context.bot.send_message(chat_id=winner_id, text=msg.build_victory_game_message(number), parse_mode=ParseMode.HTML)
+			context.bot.send_sticker(chat_id=winner_id, sticker=ass.get_sticker_id(0))
+		except:
+			logging.info("Imposible to inform victory to " + hide_id(id))
+	else:
+		logging.info(hide_id(id) + " wanted to end a game round without the password...")
+		context.bot.send_message(chat_id=id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
+
 #Triggering /help command...
 def print_help(update, context):
 	id = update.effective_chat.id
@@ -201,6 +243,10 @@ def print_photo_id(update, context):
 	print("///////")
 	print(update.message.photo[0]["file_id"] + ";")
 
+def print_sticker_id(update, context):
+	print("///////")
+	print(update.message.sticker["file_id"] + ";")
+
 #Hiding the first numbers of a chat id for the log...
 def hide_id(id):
 	s = str(id)
@@ -231,11 +277,13 @@ def main():
 	dp.add_handler(CommandHandler("palindromo", send_palindromo), group=2)
 	dp.add_handler(CommandHandler("reversible", send_reverse_number), group=2)
 	dp.add_handler(CommandHandler("video", send_video), group=2)
+	dp.add_handler(CommandHandler("jugar", save_game_move), group=2)
+	dp.add_handler(CommandHandler("terminarjuego", end_game), group=2)
 	dp.add_handler(CommandHandler("info", print_info), group=2)
 	dp.add_handler(CommandHandler("help", print_help), group=2)
 	dp.add_handler(build_conversation_handler(), group=1)
 	dp.add_handler(MessageHandler(Filters.text & ~Filters.command, wrong_message), group=1)
-	#dp.add_handler(MessageHandler(Filters.photo & ~Filters.command, print_photo_id), group=1)
+	#dp.add_handler(MessageHandler(Filters.sticker & ~Filters.command, print_sticker_id), group=1)
 	dp.bot.send_message(chat_id=config["admin_id"], text="The bot is online!", parse_mode=ParseMode.HTML)
 	updater.start_polling(drop_pending_updates=True)
 	updater.idle()

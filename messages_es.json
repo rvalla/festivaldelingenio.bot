@@ -6,11 +6,15 @@
 	"reverse_number": "Acá te mando un número escrito de forma reversible:",
 	"reverse_error": "No tengo solución para ese número",
 	"start_challenge": "Estoy listo para desafiarte...",
+	"play_move": "Registré la siguiente jugada:",
+	"play_move_error": "¡Tenés que mandarme /jugar seguido de tu número!\nPor ejemplo: /jugar 11",
+	"play_victory": "¡Felicitaciones! Ganaste una ronda del juego.",
 	"wrong": "Si querés charlar en el festival hay un montón de gente macanuda. Yo entiendo comandos nomás...",
 	"good_answer": "¡Correcto!",
 	"bad_answer": "No es la respuesta correcta...",
 	"cancel": "Queda cancelado el desafío...",
 	"wrong_cancel": "No hay nada que cancelar che...",
 	"end_challenge": "Doy por terminado el desafío. ¡La seguimos después!",
-	"error": "Algo salió mal... ¡Qué vergüenza!"
+	"error": "Algo salió mal... ¡Qué vergüenza!",
+	"intruder": "No tenés autorización para ejecutar ese comando."
 }

@@ -19,6 +19,7 @@ Here you can see the list of available commands. Some of them allow you to pass 
 - **/acertijo**: to start an *acertijo challenge*.
 - **/reversible n**: to receive a reversible number *n* or a random one.
 - **/palindromo**: sends a palíndromo.
+- **/jugar n**: to register a move in the *minor number game*.
 - **/video**: share a video from the Youtube chanel.
 - **/help**: obviously to help.
 - **/info**: to share social networks.
@@ -26,8 +27,8 @@ Here you can see the list of available commands. Some of them allow you to pass 
 ## running the code
 
 Note that you will need a *config.json* file on root which includes the bot's mandatory token to run this software.
-Currently *token* (provided by [@BotFather](https://t.me/BotFather) and *logging* (info, debugging or persistent)
-are needed:
+Currently *token* (provided by [@BotFather](https://t.me/BotFather), *logging* (info, debugging or persistent) and
+*password* (to authenticate some secrets commands) are needed:
 
 ```
 {
@@ -37,6 +38,7 @@ are needed:
 	"admin_id": "A mistery",
 	"link": "https://t.me/festivaldelingenio_bot",
 	"token": "I won't tell you my token",
+	"password": "Another mistery"
 	"logging": "info",
 }
 

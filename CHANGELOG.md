@@ -2,6 +2,15 @@
 
 # Festival del Ingenio Bot: changelog
 
+## 2021-11-20: v0.4 beta
+
+Different bugs were fixed. The **bot** can be used to play a live game. A new *Game()* class saves a series
+a moves for a game which is ended by an administrator message (password needed). There are new challenges and the
+sticker's database is bigger. Some of the new features are:  
+
+- **Challenges**: A user who ask for a solution receives an explanation for the difficult ones now.
+- **Commands**: You can send */jugar n* to play a round of the *minor number game*.
+
 ## 2021-11-18: v0.3 beta
 
 The structure of the **bot** is ready. Some of the changes and new features are:

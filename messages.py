@@ -66,6 +66,27 @@ class Messages():
 			"<i>" + data[4] + "</i>"
 		return m
 
+	#Building the message to confirm a game move...
+	def build_game_move_message(self, number, name):
+		m = self.get_message("play_move") + "\n"
+		m += "Tu nombre: <b>" + name + "</b>\n"
+		m += "Tu número: <b>" + number + "</b>"
+		return m
+
+	#Building the message to inform a winner to the admin...
+	def build_end_game_message(self, number, winner):
+		m = "Terminando juego...\n" + \
+			"El ganador de esta ronda es " + \
+			"<b>" + winner + "</b> " + \
+			"con el número <b>" + number + "</b>"
+		return m
+
+	#Building the message to inform a victory...
+	def build_victory_game_message(self, number):
+		m = self.get_message("play_victory") + "\n" + \
+			"Tu número ganador fue el <b>" + number + "</b>."
+		return m
+
 	#The message triggered with /info command...
 	def build_info_message(self):
 		m = "El <b>Festival del Ingenio</b> es un encuentro para aprender y divertirse con acertijos, juegos, " + \
@@ -83,5 +104,6 @@ class Messages():
 			"> Mandame /rebus o /acertijo para que te desafíe acá mismo.\n" + \
 			"> Mandame /palindromo para que te sorprenda con una oración que se lee al derecho y al revés.\n" + \
 			"> Mandame /reversible seguido de un número si querés ver un número escrito de manera reversible.\n" + \
+			"> Mandame /jugar seguido de un número para participar de una ronde del <i>juego del menor número</i>" + \
 			"> Mandame /video si querés que comparta con vos un video de algunas de las charlas del festival."
 		return m
