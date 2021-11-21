@@ -171,20 +171,30 @@ def save_game_move(update, context):
 	id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) == 2:
-		fn = update.effective_chat.first_name
-		ln = update.effective_chat.last_name
 		try:
-			name = fn + " " + ln
+			number = int(m[1]) #First we check if the user sent us a number
+			fn = update.effective_chat.first_name
+			ln = update.effective_chat.last_name
+			try:
+				name = fn + " " + ln #Saving first_name + last_name in case last_name is not None
+			except:
+				name = fn
+			logging.info(hide_id(id) + " playing a move in our game...")
+			if gm.save_move(number, name, id): #Saving a move... Returns False if the player played before in the round...
+				context.bot.send_message(chat_id=id, text=msg.build_game_move_message(number, name), parse_mode=ParseMode.HTML)
+			else:
+				context.bot.send_message(chat_id=id, text=msg.get_message("play_double_move"), parse_mode=ParseMode.HTML)
 		except:
-			name = fn
-		number = m[1]
-		logging.info(hide_id(id) + " play a move in our game...")
-		gm.save_move(number, name, id)
-		context.bot.send_message(chat_id=id, text=msg.build_game_move_message(number, name), parse_mode=ParseMode.HTML)
+			failed_game_move(context, id)
 	else:
-		logging.info(hide_id(id) + " failed to play a move...")
-		context.bot.send_message(chat_id=id, text=msg.get_message("play_move_error"), parse_mode=ParseMode.HTML)
+		failed_game_move(context, id)
 
+#Notifying the user of a wrong game move...
+def failed_game_move(context, id):
+	logging.info(hide_id(id) + " failed to play a move...")
+	context.bot.send_message(chat_id=id, text=msg.get_message("play_move_error"), parse_mode=ParseMode.HTML)
+
+#Ending a game round...
 def end_game(update, context):
 	id = update.effective_chat.id
 	m = update.message.text.split(" ")
@@ -193,12 +203,33 @@ def end_game(update, context):
 		logging.info(hide_id(id) + " ending a game round...")
 		context.bot.send_message(chat_id=id, text=msg.build_end_game_message(number, winner), parse_mode=ParseMode.HTML)
 		try:
-			context.bot.send_message(chat_id=winner_id, text=msg.build_victory_game_message(number), parse_mode=ParseMode.HTML)
-			context.bot.send_sticker(chat_id=winner_id, sticker=ass.get_sticker_id(0))
+			if not winner_id == None:
+				context.bot.send_message(chat_id=winner_id, text=msg.build_victory_game_message(number), parse_mode=ParseMode.HTML)
+				context.bot.send_sticker(chat_id=winner_id, sticker=ass.get_sticker_id(0))
+				logging.info("Game round victory notification sent")
+			loosers = gm.get_loosers(winner_id)
+			looser_message = msg.build_loose_game_message(winner, number)
+			loosers = gm.get_loosers(winner_id)
+			logging.info("Notifying loosers of the game round")
+			for l in loosers:
+				context.bot.send_message(chat_id=l, text=looser_message, parse_mode=ParseMode.HTML)
+				context.bot.send_sticker(chat_id=l, sticker=ass.get_sticker_id(2))
 		except:
-			logging.info("Imposible to inform victory to " + hide_id(id))
+			logging.info("Problems during game round notifications.")
+		gm.reset()
 	else:
 		logging.info(hide_id(id) + " wanted to end a game round without the password...")
+		context.bot.send_message(chat_id=id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
+
+#Sending game current state...
+def game_info(update, context):
+	id = update.effective_chat.id
+	m = update.message.text.split(" ")
+	if len(m) > 1 and m[1] == config["password"]:
+		m = gm.game_info()
+		context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	else:
+		logging.info(hide_id(id) + " wanted to check a game round state...")
 		context.bot.send_message(chat_id=id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
 
 #Triggering /help command...
@@ -269,12 +300,13 @@ def main():
 		logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 	updater = Updater(config["token"], request_kwargs={'read_timeout': 5, 'connect_timeout': 5})
 	dp = updater.dispatcher
-	dp.add_error_handler(error_notification)
+	#dp.add_error_handler(error_notification)
 	dp.add_handler(CommandHandler("start", start), group=2)
 	dp.add_handler(CommandHandler("palindromo", send_palindromo), group=2)
 	dp.add_handler(CommandHandler("reversible", send_reverse_number), group=2)
 	dp.add_handler(CommandHandler("video", send_video), group=2)
 	dp.add_handler(CommandHandler("jugar", save_game_move), group=2)
+	dp.add_handler(CommandHandler("chequearjuego", game_info), group=2)
 	dp.add_handler(CommandHandler("terminarjuego", end_game), group=2)
 	dp.add_handler(CommandHandler("info", print_info), group=2)
 	dp.add_handler(CommandHandler("help", print_help), group=2)

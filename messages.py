@@ -70,7 +70,7 @@ class Messages():
 	def build_game_move_message(self, number, name):
 		m = self.get_message("play_move") + "\n"
 		m += "Tu nombre: <b>" + name + "</b>\n"
-		m += "Tu número: <b>" + number + "</b>"
+		m += "Tu número: <b>" + str(number) + "</b>"
 		return m
 
 	#Building the message to inform a winner to the admin...
@@ -85,6 +85,12 @@ class Messages():
 	def build_victory_game_message(self, number):
 		m = self.get_message("play_victory") + "\n" + \
 			"Tu número ganador fue el <b>" + number + "</b>."
+		return m
+
+	#Building the message to inform a victory...
+	def build_loose_game_message(self, name, number):
+		m = self.get_message("play_loose") + "\n" + \
+			"Ganó <b>" + name + "</b> con el número <b>" + number + "</b>"
 		return m
 
 	#The message triggered with /info command...
