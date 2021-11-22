@@ -3,3 +3,4 @@ config.json
 __pycache__
 rebuses
 reverse_numbers
+testing.py

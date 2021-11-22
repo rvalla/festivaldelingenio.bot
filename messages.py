@@ -19,11 +19,11 @@ class Messages():
 		return "<b>" + m + "</b>"
 
 	#Building the message to start a rebus challenge...
-	def build_rebus_message(self, w):
+	def build_rebus_message(self, type, w):
 		if w == "1":
-			m = "<b>REBÚS:</b> " + w + " palabra"
+			m = "<b>"+ type + ":</b> " + w + " palabra"
 		else:
-			m = "<b>REBÚS:</b> " + w + " palabras"
+			m = "<b>"+ type + ":</b> " + w + " palabras"
 		return m
 
 	#Building the message to start an acertijo challenge...
@@ -74,11 +74,14 @@ class Messages():
 		return m
 
 	#Building the message to inform a winner to the admin...
-	def build_end_game_message(self, number, winner):
-		m = "Terminando juego...\n" + \
-			"El ganador de esta ronda es " + \
-			"<b>" + winner + "</b> " + \
-			"con el número <b>" + number + "</b>"
+	def build_end_game_message(self, winner_exist, number, winner):
+		m = "<b>Ronda del juego finalizada</b>\n"
+		if winner_exist:
+			m += "El ganador de esta ronda es " + \
+				"<b>" + winner + "</b> " + \
+				"con el número <b>" + number + "</b>"
+		else:
+			m += "DESIERTA"
 		return m
 
 	#Building the message to inform a victory...
@@ -88,9 +91,12 @@ class Messages():
 		return m
 
 	#Building the message to inform a victory...
-	def build_loose_game_message(self, name, number):
-		m = self.get_message("play_loose") + "\n" + \
-			"Ganó <b>" + name + "</b> con el número <b>" + number + "</b>"
+	def build_loose_game_message(self, winner_exist, name, number):
+		m = self.get_message("play_loose") + "\n"
+		if winner_exist:
+			m += "Ganó <b>" + name + "</b> con el número <b>" + number + "</b>"
+		else:
+			m += "Esta ronda quedó desierta. <b>" + name + "</b> jugó <b>" + number + "</b>."
 		return m
 
 	#The message triggered with /info command...
@@ -100,7 +106,7 @@ class Messages():
 			"Podés enterarte de todas las novedades del festival en <a href='https://www.instagram.com/festivaldelingenio/'>" + \
 			"Instagram</a>.\n\n" + \
 			"Mi contenido incluye algunos palíndromos y acertijos populares pero también contenido original de " + \
-			"<b>Rodolfo Kurchan</b> y <b>Esteban Grinbank</b>.\n\n" + \
+			"<b>Rodolfo Kurchan</b>, <b>Esteban Grinbank</b> y <b>Los Columnerds</b>.\n\n" + \
 			"Mi administrador es @rvalla, escribile si me encontrás algún problema."
 		return m
 
