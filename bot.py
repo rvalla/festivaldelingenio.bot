@@ -6,13 +6,14 @@ from messages import Messages
 from assets import Assets
 from game import Game
 
+logger = logging.getLogger(__name__)
 config = js.load(open("config.json")) #The configuration .json file (token included)
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
 gm = Game() #The class to let the users play some game...
 TRYING = range(1) #Conversation states...
-rebus_keys = ["type","words","solution","explanation","hint","file_id","path"] #Keys to load rebus data...
-acertijo_keys = ["type","words","solution_type","type_category","statement","solution","explanation","hint"] #Keys to load acertijo data...
+rebus_keys = ["command", "type","animated","words","solution","explanation","hint","file_id","path"] #Keys to load rebus data...
+acertijo_keys = ["command", "type","words","solution_type","statement","solution","explanation","hint"] #Keys to load acertijo data...
 attempts_limit = 2 #Defining the number of attempts before ending a challenge...
 vowelsa, vowelsb = "áéíóúü", "aeiouu" #Mapping special characters to check sent solutions...
 translation = str.maketrans(vowelsa, vowelsb)
@@ -39,15 +40,22 @@ def start_rebus(update, context):
 	logging.info(hide_id(id) + " started rebus challenge...")
 	load_challenge(context.user_data, ass.get_rebus_data(), rebus_keys)
 	context.bot.send_message(chat_id=id, text=msg.get_message("start_challenge"), parse_mode=ParseMode.HTML)
-	context.bot.send_message(chat_id=id, text=msg.build_rebus_message(context.user_data["words"]), parse_mode=ParseMode.HTML)
+	context.bot.send_message(chat_id=id, text=msg.build_rebus_message(context.user_data["type"], context.user_data["words"]), parse_mode=ParseMode.HTML)
 	try:
 		logging.info("Sending rebus image now..")
-		context.bot.send_photo(chat_id=id, photo=context.user_data["file_id"])
+		send_image(context, context.user_data["animated"], id, context.user_data["file_id"])
 		return TRYING #Entering TRYING state if image was sent succesfully...
 	except:
 		logging.info("Error: It was imposible to send the image")
 		context.bot.send_message(chat_id=id, text=msg.get_message("error"), parse_mode=ParseMode.HTML)
 		return ConversationHandler.END #Ending challenge if image was not sent...
+
+#Sending images and animations...
+def send_image(context, animated, id, file_id):
+	if animated == "True":
+		context.bot.send_animation(chat_id=id, animation=file_id)
+	else:
+		context.bot.send_photo(chat_id=id, photo=file_id)
 
 #Loading challenge data to CallbackContext
 def load_challenge(user_data, rebus, keys):
@@ -97,7 +105,7 @@ def is_correct_answer(message, solution, solution_words):
 def send_congrats(update, context):
 	if context.user_data["saw_hint"] == False:
 		update.message.reply_sticker(ass.get_sticker_id(0))
-	update.message.reply_text(msg.build_congrats_message("good_answer", context.user_data["type"]))
+	update.message.reply_text(msg.build_congrats_message("good_answer", context.user_data["command"]))
 	context.user_data.clear()
 
 #Sending the challenge's hint...
@@ -111,7 +119,7 @@ def send_hint(update, context):
 #Sending the solution from a challenge...
 def send_solution(update, context):
 	id = update.effective_chat.id
-	m = msg.build_solution_message(context.user_data["solution"], context.user_data["type"], context.user_data["explanation"])
+	m = msg.build_solution_message(context.user_data["solution"], context.user_data["command"], context.user_data["explanation"])
 	context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
 	if context.user_data["saw_hint"] == False:
 		context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(1))
@@ -119,7 +127,7 @@ def send_solution(update, context):
 
 #Ending a challenge...
 def end_challenge(update, context):
-	m = msg.build_end_challenge_message("end_challenge", context.user_data["type"])
+	m = msg.build_end_challenge_message("end_challenge", context.user_data["command"])
 	context.bot.send_message(chat_id=update.effective_chat.id, text=m, parse_mode=ParseMode.HTML)
 	context.user_data.clear()
 	return ConversationHandler.END
@@ -199,17 +207,18 @@ def end_game(update, context):
 	id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) > 1 and m[1] == config["password"]:
-		number, winner, winner_id = gm.end_game()
+		winner_exist, number, winner, winner_id = gm.end_game()
 		logging.info(hide_id(id) + " ending a game round...")
-		context.bot.send_message(chat_id=id, text=msg.build_end_game_message(number, winner), parse_mode=ParseMode.HTML)
+		end_m = gm.game_info() + "\n\n" + \
+				msg.build_end_game_message(winner_exist, number, winner)
+		context.bot.send_message(chat_id=id, text=end_m, parse_mode=ParseMode.HTML)
 		try:
-			if not winner_id == None:
+			if winner_exist:
 				context.bot.send_message(chat_id=winner_id, text=msg.build_victory_game_message(number), parse_mode=ParseMode.HTML)
 				context.bot.send_sticker(chat_id=winner_id, sticker=ass.get_sticker_id(0))
 				logging.info("Game round victory notification sent")
 			loosers = gm.get_loosers(winner_id)
-			looser_message = msg.build_loose_game_message(winner, number)
-			loosers = gm.get_loosers(winner_id)
+			looser_message = msg.build_loose_game_message(winner_exist, winner, number)
 			logging.info("Notifying loosers of the game round")
 			for l in loosers:
 				context.bot.send_message(chat_id=l, text=looser_message, parse_mode=ParseMode.HTML)
@@ -271,6 +280,10 @@ def print_photo_id(update, context):
 	print("///////")
 	print(update.message.photo[0]["file_id"] + ";")
 
+def print_animation_id(update, context):
+	print("///////")
+	print(update.message.animation["file_id"] + ";")
+
 def print_sticker_id(update, context):
 	print("///////")
 	print(update.message.sticker["file_id"] + ";")
@@ -312,7 +325,7 @@ def main():
 	dp.add_handler(CommandHandler("help", print_help), group=2)
 	dp.add_handler(build_conversation_handler(), group=1)
 	dp.add_handler(MessageHandler(Filters.text & ~Filters.command, wrong_message), group=1)
-	#dp.add_handler(MessageHandler(Filters.sticker & ~Filters.command, print_sticker_id), group=1)
+	#dp.add_handler(MessageHandler(Filters.animation & ~Filters.command, print_animation_id), group=1)
 	dp.bot.send_message(chat_id=config["admin_id"], text="The bot is online!", parse_mode=ParseMode.HTML)
 	updater.start_polling(drop_pending_updates=True)
 	updater.idle()
