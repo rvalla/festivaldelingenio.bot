@@ -1,4 +1,5 @@
 import json as js
+import logging
 
 class Game():
 	"The class the bot use let users to play..."
@@ -8,6 +9,7 @@ class Game():
 		self.numbers = set() #A set with all numbers played...
 		self.players_moves = {} #A dictionary which maps numbers with players...
 		self.players_ids = set() #The set of all players in a round...
+		self.logger = logging.getLogger(__name__)
 
 	#Saving a move...
 	def save_move(self, number, player, id):
@@ -21,22 +23,30 @@ class Game():
 				self.players_moves[number].append((player, id))
 			except:
 				self.players_moves[number] = [(player, id)]
+			self.logger.info(player + " registró una jugada: " + str(number))
+		else:
+			self.logger.info(player + " intentó registrar una 2da jugada")
 		return moving
 
 	#Looking for a winner...
 	def end_game(self):
-		unique = False
-		winner = "NOBODY"
+		winner_exist = False
+		winner = "Jaime Poniachik"
+		number = "pi * ln(e)"
 		id = None
-		number = -1
-		for n in range(1,1000):
+		for n in range(1,250):
 			if n in self.numbers:
 				if len(self.players_moves[n]) == 1:
-					number = n
+					number = str(n)
 					winner = self.players_moves[n][0][0]
 					id = self.players_moves[n][0][1]
+					winner_exist = True
 					break
-		return str(number), winner, id
+		if winner_exist:
+			self.logger.info(winner + " ganó una ronda (" + number + ")")
+		else:
+			self.logger.info("Termina una ronda sin ganador")
+		return winner_exist, number, winner, id
 
 	#Returning the ids from the loosers of a round to inform the result...
 	def get_loosers(self, winner_id):
@@ -47,11 +57,13 @@ class Game():
 	def game_info(self):
 		m = "<b>Estado del juego</b>\n" + \
 			"Cantidad de jugadas: " + str(self.moves) + "\n" + \
+			"Cantidad de números: " + str(len(self.numbers)) + "\n" + \
 			"Jugadas: " + str(self.numbers)
 		return m
 
 	#Getting ready for a new round...
 	def reset(self):
+		self.logger.info("Reseteando ronda: " + str(self.moves) + " jugadas, " + str(len(self.numbers)) + " números.")
 		self.moves = 0
 		self.numbers.clear()
 		self.players_moves.clear()
