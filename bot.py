@@ -181,17 +181,20 @@ def save_game_move(update, context):
 	if len(m) == 2:
 		try:
 			number = int(m[1]) #First we check if the user sent us a number
-			fn = update.effective_chat.first_name
-			ln = update.effective_chat.last_name
-			try:
-				name = fn + " " + ln #Saving first_name + last_name in case last_name is not None
-			except:
-				name = fn
-			logging.info(hide_id(id) + " playing a move in our game...")
-			if gm.save_move(number, name, id): #Saving a move... Returns False if the player played before in the round...
-				context.bot.send_message(chat_id=id, text=msg.build_game_move_message(number, name), parse_mode=ParseMode.HTML)
+			if number > 0:
+				fn = update.effective_chat.first_name
+				ln = update.effective_chat.last_name
+				try:
+					name = fn + " " + ln #Saving first_name + last_name in case last_name is not None
+				except:
+					name = fn
+				logging.info(hide_id(id) + " playing a move in our game...")
+				if gm.save_move(number, name, id): #Saving a move... Returns False if the player played before in the round...
+					context.bot.send_message(chat_id=id, text=msg.build_game_move_message(number, name), parse_mode=ParseMode.HTML)
+				else:
+					context.bot.send_message(chat_id=id, text=msg.get_message("play_double_move"), parse_mode=ParseMode.HTML)
 			else:
-				context.bot.send_message(chat_id=id, text=msg.get_message("play_double_move"), parse_mode=ParseMode.HTML)
+				failed_game_move(context, id)
 		except:
 			failed_game_move(context, id)
 	else:
@@ -327,8 +330,13 @@ def main():
 	dp.add_handler(MessageHandler(Filters.text & ~Filters.command, wrong_message), group=1)
 	#dp.add_handler(MessageHandler(Filters.animation & ~Filters.command, print_animation_id), group=1)
 	dp.bot.send_message(chat_id=config["admin_id"], text="The bot is online!", parse_mode=ParseMode.HTML)
-	updater.start_polling(drop_pending_updates=True)
-	updater.idle()
+	if config["webhook"]:
+		wh_url = "https://" + config["public_ip"] + "/" + config["token"]
+		updater.start_webhook(listen="0.0.0.0", port=8443, url_path=config["token"], key="webhook.key",
+							cert="webhook.pem", webhook_url=wh_url, drop_pending_updates=True)
+	else:
+		updater.start_polling(drop_pending_updates=True)
+		updater.idle()
 
 if __name__ == "__main__":
 	main()
