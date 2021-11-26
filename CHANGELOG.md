@@ -2,6 +2,11 @@
 
 # Festival del Ingenio Bot: changelog
 
+## 2021-11-26: v0.5 beta
+
+Ready to play during *Celebration of mind* event in Buenos Aires. Now you can use secrets commands to
+know the state or end a round of the *minor number game*.  
+
 ## 2021-11-20: v0.4 beta
 
 Different bugs were fixed. The **bot** can be used to play a live game. A new *Game()* class saves a series

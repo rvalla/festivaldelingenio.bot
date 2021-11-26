@@ -7,8 +7,9 @@ which take place in Buenos Aires every year. It is part of the family of **Celeb
 
 ## online status
 
-**Festival del Ingenio Bot** is not currently deployed. It will be available during some moments of the week while I run
-some tests. Stay tuned!
+[**Festival del Ingenio Bot**](https://t.me/festivaldelingeniobot_bot) is currently deployed in a *virtual machine* from
+[Oracle Cloud Infrastructure](https://www.oracle.com/cloud/). It will be online most of the time, when I am not
+working in it.  
 
 ## commands
 
