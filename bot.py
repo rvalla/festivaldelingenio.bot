@@ -331,8 +331,8 @@ def main():
 	dp.add_handler(MessageHandler(Filters.photo & ~Filters.command, print_photo_id), group=1)
 	dp.bot.send_message(chat_id=config["admin_id"], text="The bot is starting!", parse_mode=ParseMode.HTML)
 	if config["webhook"]:
-		wh_url = "https://" + config["public_ip"] + ":" + "8443/" + config["webhook_path"]
-		updater.start_webhook(listen="0.0.0.0", port=8443, url_path=config["webhook_path"], key="webhook.key",
+		wh_url = "https://" + config["public_ip"] + ":" + str(config["webhook_port"]) + "/" + config["webhook_path"]
+		updater.start_webhook(listen="0.0.0.0", port=config["webhook_port"], url_path=config["webhook_path"], key="webhook.key",
 							cert="webhook.pem", webhook_url=wh_url, drop_pending_updates=True)
 	else:
 		updater.start_polling(drop_pending_updates=True)
