@@ -34,13 +34,14 @@ class Game():
 		winner = "Jaime Poniachik"
 		number = "pi * ln(e)"
 		id = None
-		for n in self.numbers:
-			if len(self.players_moves[n]) == 1:
-				number = str(n)
-				winner = self.players_moves[n][0][0]
-				id = self.players_moves[n][0][1]
-				winner_exist = True
-				break
+		for n in range(1,300):
+			if n in self.numbers:
+				if len(self.players_moves[n]) == 1:
+					number = str(n)
+					winner = self.players_moves[n][0][0]
+					id = self.players_moves[n][0][1]
+					winner_exist = True
+					break
 		if winner_exist:
 			self.logger.info(winner + " ganó una ronda (" + number + ")")
 		else:
