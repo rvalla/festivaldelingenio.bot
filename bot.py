@@ -11,7 +11,7 @@ config = js.load(open("config.json")) #The configuration .json file (token inclu
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
 gm = Game() #The class to let the users play some game...
-TRYING = range(1) #Conversation states...
+TRYING, DOOR = range(2) #Conversation states...
 rebus_keys = ["command", "type","animated","words","solution","explanation","hint","file_id","path"] #Keys to load rebus data...
 acertijo_keys = ["command", "type","words","solution_type","statement","solution","explanation","hint"] #Keys to load acertijo data...
 attempts_limit = 2 #Defining the number of attempts before ending a challenge...
@@ -175,7 +175,7 @@ def send_video(update, context):
 	context.bot.send_message(chat_id=id, text=msg.build_video_message(ass.get_video_data()), parse_mode=ParseMode.HTML)
 
 #Using the bot to play a live game...
-def save_game_move(update, context):
+def save_minor_number(update, context):
 	id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) == 2:
@@ -188,57 +188,57 @@ def save_game_move(update, context):
 					name = fn + " " + ln #Saving first_name + last_name in case last_name is not None
 				except:
 					name = fn
-				logging.info(hide_id(id) + " playing a move in our game...")
-				if gm.save_move(number, name, id): #Saving a move... Returns False if the player played before in the round...
-					context.bot.send_message(chat_id=id, text=msg.build_game_move_message(number, name), parse_mode=ParseMode.HTML)
+				logging.info(hide_id(id) + " playing a move in minor number game...")
+				if gm.save_minor_number(number, name, id): #Saving a move... Returns False if the player played before in the round...
+					context.bot.send_message(chat_id=id, text=msg.build_minor_move_message(number, name), parse_mode=ParseMode.HTML)
 				else:
 					context.bot.send_message(chat_id=id, text=msg.get_message("play_double_move"), parse_mode=ParseMode.HTML)
 			else:
-				failed_game_move(context, id)
+				failed_minor_number(context, id)
 		except:
-			failed_game_move(context, id)
+			failed_minor_number(context, id)
 	else:
-		failed_game_move(context, id)
+		failed_minor_number(context, id)
 
 #Notifying the user of a wrong game move...
-def failed_game_move(context, id):
+def failed_minor_number(context, id):
 	logging.info(hide_id(id) + " failed to play a move...")
-	context.bot.send_message(chat_id=id, text=msg.get_message("play_move_error"), parse_mode=ParseMode.HTML)
+	context.bot.send_message(chat_id=id, text=msg.get_message("play_minor_number_move_error"), parse_mode=ParseMode.HTML)
 
 #Ending a game round...
-def end_game(update, context):
+def end_minor_number(update, context):
 	id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) > 1 and m[1] == config["password"]:
-		winner_exist, number, winner, winner_id = gm.end_game()
-		logging.info(hide_id(id) + " ending a game round...")
-		end_m = gm.game_info() + "\n\n" + \
-				msg.build_end_game_message(winner_exist, number, winner)
+		winner_exist, number, winner, winner_id = gm.end_minor_game()
+		logging.info(hide_id(id) + " ending a minor game round...")
+		end_m = gm.minor_info() + "\n\n" + \
+				msg.build_minor_game_message(winner_exist, number, winner)
 		context.bot.send_message(chat_id=id, text=end_m, parse_mode=ParseMode.HTML)
 		try:
 			if winner_exist:
-				context.bot.send_message(chat_id=winner_id, text=msg.build_victory_game_message(number), parse_mode=ParseMode.HTML)
+				context.bot.send_message(chat_id=winner_id, text=msg.build_minor_victory_message(number), parse_mode=ParseMode.HTML)
 				context.bot.send_sticker(chat_id=winner_id, sticker=ass.get_sticker_id(0))
 				logging.info("Game round victory notification sent")
-			loosers = gm.get_loosers(winner_id)
-			looser_message = msg.build_loose_game_message(winner_exist, winner, number)
-			logging.info("Notifying loosers of the game round")
+			loosers = gm.get_minor_loosers(winner_id)
+			looser_message = msg.build_minor_loose_message(winner_exist, winner, number)
+			logging.info("Notifying loosers of a minor game round")
 			for l in loosers:
 				context.bot.send_message(chat_id=l, text=looser_message, parse_mode=ParseMode.HTML)
 				context.bot.send_sticker(chat_id=l, sticker=ass.get_sticker_id(2))
 		except:
 			logging.info("Problems during game round notifications.")
-		gm.reset()
+		gm.minor_reset()
 	else:
 		logging.info(hide_id(id) + " wanted to end a game round without the password...")
 		context.bot.send_message(chat_id=id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
 
 #Sending game current state...
-def game_info(update, context):
+def minor_number_info(update, context):
 	id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) > 1 and m[1] == config["password"]:
-		m = gm.game_info()
+		m = gm.minor_info()
 		context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
 	else:
 		logging.info(hide_id(id) + " wanted to check a game round state...")
@@ -309,21 +309,21 @@ def build_conversation_handler():
 def main():
 	if config["logging"] == "persistent":
 		logging.basicConfig(filename="history.txt", filemode='a',level=logging.INFO,
-						format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+						format="%(asctime)s;%(name)s;%(levelname)s;%(message)s")
 	elif config["logging"] == "debugging":
-		logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+		logging.basicConfig(level=logging.DEBUG, format="%(asctime)s;%(name)s;%(levelname)s;%(message)s")
 	else:
-		logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+		logging.basicConfig(level=logging.INFO, format="%(asctime)s;%(name)s;%(levelname)s;%(message)s")
 	updater = Updater(config["token"], request_kwargs={'read_timeout': 5, 'connect_timeout': 5})
 	dp = updater.dispatcher
-	dp.add_error_handler(error_notification)
+#	dp.add_error_handler(error_notification)
 	dp.add_handler(CommandHandler("start", start), group=2)
 	dp.add_handler(CommandHandler("palindromo", send_palindromo), group=2)
 	dp.add_handler(CommandHandler("reversible", send_reverse_number), group=2)
 	dp.add_handler(CommandHandler("video", send_video), group=2)
-	dp.add_handler(CommandHandler("jugar", save_game_move), group=2)
-	dp.add_handler(CommandHandler("chequearjuego", game_info), group=2)
-	dp.add_handler(CommandHandler("terminarjuego", end_game), group=2)
+	dp.add_handler(CommandHandler("jugarmenor", save_minor_number), group=2)
+	dp.add_handler(CommandHandler("chequearmenor", minor_number_info), group=2)
+	dp.add_handler(CommandHandler("terminarmenor", end_minor_number), group=2)
 	dp.add_handler(CommandHandler("info", print_info), group=2)
 	dp.add_handler(CommandHandler("help", print_help), group=2)
 	dp.add_handler(build_conversation_handler(), group=1)

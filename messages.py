@@ -67,14 +67,14 @@ class Messages():
 		return m
 
 	#Building the message to confirm a game move...
-	def build_game_move_message(self, number, name):
-		m = self.get_message("play_move") + "\n"
+	def build_minor_move_message(self, number, name):
+		m = self.get_message("play_minor_number_move") + "\n"
 		m += "Tu nombre: <b>" + name + "</b>\n"
 		m += "Tu número: <b>" + str(number) + "</b>"
 		return m
 
 	#Building the message to inform a winner to the admin...
-	def build_end_game_message(self, winner_exist, number, winner):
+	def build_minor_game_message(self, winner_exist, number, winner):
 		m = "<b>Ronda del juego finalizada</b>\n"
 		if winner_exist:
 			m += "El ganador de esta ronda es " + \
@@ -85,14 +85,14 @@ class Messages():
 		return m
 
 	#Building the message to inform a victory...
-	def build_victory_game_message(self, number):
-		m = self.get_message("play_victory") + "\n" + \
+	def build_minor_victory_message(self, number):
+		m = self.get_message("play_minor_number_victory") + "\n" + \
 			"Tu número ganador fue el <b>" + number + "</b>."
 		return m
 
 	#Building the message to inform a victory...
-	def build_loose_game_message(self, winner_exist, name, number):
-		m = self.get_message("play_loose") + "\n"
+	def build_minor_loose_message(self, winner_exist, name, number):
+		m = self.get_message("play_minor_number_loose") + "\n"
 		if winner_exist:
 			m += "Ganó <b>" + name + "</b> con el número <b>" + number + "</b>"
 		else:
@@ -116,6 +116,6 @@ class Messages():
 			"> Mandame /rebus o /acertijo para que te desafíe acá mismo.\n" + \
 			"> Mandame /palindromo para que te sorprenda con una oración que se lee al derecho y al revés.\n" + \
 			"> Mandame /reversible seguido de un número si querés ver un número escrito de manera reversible.\n" + \
-			"> Mandame /jugar seguido de un número para participar de una ronde del <i>juego del menor número</i>" + \
+			"> Mandame /jugarmenor seguido de un número para participar de una ronda del <i>juego del menor número</i>.\n" + \
 			"> Mandame /video si querés que comparta con vos un video de algunas de las charlas del festival."
 		return m
