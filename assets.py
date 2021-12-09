@@ -73,6 +73,7 @@ class Assets():
 		victory = []
 		hint = []
 		loose = []
+		cheat = []
 		for s in source:
 			data = s.split(";")
 			if int(data[3]) == 0:
@@ -81,8 +82,11 @@ class Assets():
 				hint.append(data[1])
 			elif int(data[3]) == 2:
 				loose.append(data[1])
+			elif int(data[3]) == 3:
+				cheat.append(data[1])
 		result = []
 		result.append(victory)
 		result.append(hint)
 		result.append(loose)
+		result.append(cheat)
 		return result
