@@ -2,6 +2,16 @@
 
 # Festival del Ingenio Bot: changelog
 
+## 2021-12-09: v0.6 beta
+
+New assets were added. **Game()** class is bigger and has new name: **Play()**, a change that make sense since
+the new **Play()** class will be in charge of new games. One of them is *the firewall* in which users must find
+out what conditions a message has to meet to pass through a filter.
+
+- **Commands**: the command to play a *minor number* round is */jugarmenor* now. A new */firewall* command
+can be used to play a new individual game. Now you can pass arguments along */help* command to receive
+instructions to play games (menor, promedio, firewall).
+
 ## 2021-11-26: v0.5 beta
 
 Ready to play during *Celebration of mind* event in Buenos Aires. Now you can use secrets commands to

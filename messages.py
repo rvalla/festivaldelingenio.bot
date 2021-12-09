@@ -61,7 +61,7 @@ class Messages():
 	#Building the message to start a firewall round...
 	def build_start_firewall_message(self, ex_pass, ex_notpass):
 		m = self.get_message("start_firewall")
-		m += "En este momento el mensaje <b>| " + ex_pass + " |</b> pasa. En cambio, " + \
+		m += "El mensaje <b>| " + ex_pass + " |</b> logra atravesar el <i>firewall</i>. En cambio, " + \
 			"el mensaje <b>| " + ex_notpass + " |</b> es bloqueado."
 		return m
 

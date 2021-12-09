@@ -74,9 +74,17 @@ class Play():
 	#Deciding if a move in firewalls game is good...
 	def check_firewall(self, algorithm, move, parameters=[]):
 		if algorithm == 0:
-			return self.check_firewall_range(move, parameters)
+			try:
+				n = int(move)
+				return self.check_firewall_range(n, parameters)
+			except:
+				return False
 		elif algorithm == 1:
-			return self.check_firewall_remainder(move, parameters)
+			try:
+				n = int(move)
+				return self.check_firewall_remainder(n, parameters)
+			except:
+				return False
 		elif algorithm == 2:
 			return self.check_firewall_letter_count(move, parameters[0])
 		elif algorithm == 3:
@@ -121,7 +129,7 @@ class Play():
 
 	#Building a firewall's challenge for words of n letters...
 	def get_firewall_game(self):
-		data = rd.choice(self.firewall[10:]).split(";")
+		data = rd.choice(self.firewall).split(";")
 		round = {}
 		round["command"] = data[0]
 		round["type"] = data[1]

@@ -16,7 +16,7 @@ rebus_keys = ["command", "type","animated","words","solution","explanation","hin
 acertijo_keys = ["command", "type","words","solution_type","statement","solution","explanation","hint"] #Keys to load acertijo data...
 firewall_keys = ["command", "type", ]
 attempts_limit = 2 #Defining the number of attempts before ending a challenge...
-firewall_limits = [2, 4] #Defining victory-loose limits for firewall game...
+firewall_limits = [5, 13] #Defining victory-loose limits for firewall game...
 vowelsa, vowelsb = "áéíóúü", "aeiouu" #Mapping special characters to check sent solutions...
 translation = str.maketrans(vowelsa, vowelsb)
 
@@ -153,18 +153,23 @@ def start_firewall(update, context):
 #Checking a firewall move...
 def check_firewall(update, context):
 	id = update.effective_chat.id
-	input = update.message.text
-	context.user_data["attempts"] += 1
-	success = trough_firewall(input, context.user_data)
-	if success:
-		context.user_data["success"] += 1
-	m = msg.answer_firewall_message(success, input)
-	context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
-	if context.user_data["success"] == firewall_limits[0]:
-		end_firewall_game(update, context, True)
-		return ConversationHandler.END
-	elif firewall_limits[1] - context.user_data["attempts"] <  firewall_limits[0] - context.user_data["success"]:
-		end_firewall_game(update, context, False)
+	input = update.message.text.lower()
+	if input not in context.user_data["moves"]:
+		context.user_data["attempts"] += 1
+		success = trough_firewall(input, context.user_data)
+		if success:
+			context.user_data["success"] += 1
+			context.user_data["moves"].add(input)
+		m = msg.answer_firewall_message(success, input)
+		context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+		if context.user_data["success"] == firewall_limits[0]:
+			end_firewall_game(update, context, True)
+			return ConversationHandler.END
+		elif firewall_limits[1] - context.user_data["attempts"] <  firewall_limits[0] - context.user_data["success"]:
+			end_firewall_game(update, context, False)
+			return ConversationHandler.END
+	else:
+		firewall_cheat_detected(update, context)
 		return ConversationHandler.END
 
 #Deciding if a message pass trough the firewall...
@@ -184,14 +189,23 @@ def end_firewall_game(update, context, victory):
 	context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
 	context.user_data.clear()
 
+#Ending a firewall game because the user cheated...
+def firewall_cheat_detected(update, context):
+	id = update.effective_chat.id
+	logging.info(hide_id(id) + " ended a firewall game: CHEAT")
+	context.bot.send_message(chat_id=id, text=msg.get_message("firewall_cheat"), parse_mode=ParseMode.HTML)
+	context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(3))
+
 #Loading firewall round data...
 def load_firewall(user_data):
-	user_data["attempts"] = 0
-	user_data["success"] = 0
 	firewall = pl.get_firewall_game()
 	keys = list(firewall)
 	for k in keys:
 		user_data[k] = firewall[k]
+	user_data["attempts"] = 0
+	user_data["success"] = 0
+	user_data["moves"] = set()
+	user_data["moves"].add(user_data["ex_pass"])
 
 #Sending a palindromo for the user...
 def send_palindromo(update, context):
@@ -378,7 +392,7 @@ def main():
 		logging.basicConfig(level=logging.INFO, format="%(asctime)s;%(name)s;%(levelname)s;%(message)s")
 	updater = Updater(config["token"], request_kwargs={'read_timeout': 5, 'connect_timeout': 5})
 	dp = updater.dispatcher
-#	dp.add_error_handler(error_notification)
+	dp.add_error_handler(error_notification)
 	dp.add_handler(CommandHandler("start", start), group=2)
 	dp.add_handler(CommandHandler("palindromo", send_palindromo), group=2)
 	dp.add_handler(CommandHandler("reversible", send_reverse_number), group=2)
@@ -390,7 +404,7 @@ def main():
 	dp.add_handler(CommandHandler("help", print_help), group=2)
 	dp.add_handler(build_conversation_handler(), group=1)
 	dp.add_handler(MessageHandler(Filters.text & ~Filters.command, wrong_message), group=1)
-	dp.add_handler(MessageHandler(Filters.photo & ~Filters.command, print_photo_id), group=1)
+	#dp.add_handler(MessageHandler(Filters.sticker, print_sticker_id), group=1)
 	dp.bot.send_message(chat_id=config["admin_id"], text="The bot is starting!", parse_mode=ParseMode.HTML)
 	if config["webhook"]:
 		wh_url = "https://" + config["public_ip"] + ":" + str(config["webhook_port"]) + "/" + config["webhook_path"]
