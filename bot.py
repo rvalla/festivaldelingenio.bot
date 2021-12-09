@@ -4,17 +4,19 @@ import traceback, logging
 import json as js
 from messages import Messages
 from assets import Assets
-from game import Game
+from play import Play
 
 logger = logging.getLogger(__name__)
 config = js.load(open("config.json")) #The configuration .json file (token included)
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
-gm = Game() #The class to let the users play some game...
-TRYING, DOOR = range(2) #Conversation states...
+pl = Play() #The class to let the users play some game...
+TRYING, FIREWALL = range(2) #Conversation states...
 rebus_keys = ["command", "type","animated","words","solution","explanation","hint","file_id","path"] #Keys to load rebus data...
 acertijo_keys = ["command", "type","words","solution_type","statement","solution","explanation","hint"] #Keys to load acertijo data...
+firewall_keys = ["command", "type", ]
 attempts_limit = 2 #Defining the number of attempts before ending a challenge...
+firewall_limits = [2, 4] #Defining victory-loose limits for firewall game...
 vowelsa, vowelsb = "áéíóúü", "aeiouu" #Mapping special characters to check sent solutions...
 translation = str.maketrans(vowelsa, vowelsb)
 
@@ -139,6 +141,58 @@ def cancel_challenge(update, context):
 	context.user_data.clear()
 	return ConversationHandler.END
 
+#Starting a firewall game round...
+def start_firewall(update, context):
+	id = update.effective_chat.id
+	logging.info(hide_id(id) + " started a firewall game...")
+	load_firewall(context.user_data)
+	m = msg.build_start_firewall_message(context.user_data["ex_pass"], context.user_data["ex_notpass"])
+	context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	return FIREWALL
+
+#Checking a firewall move...
+def check_firewall(update, context):
+	id = update.effective_chat.id
+	input = update.message.text
+	context.user_data["attempts"] += 1
+	success = trough_firewall(input, context.user_data)
+	if success:
+		context.user_data["success"] += 1
+	m = msg.answer_firewall_message(success, input)
+	context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	if context.user_data["success"] == firewall_limits[0]:
+		end_firewall_game(update, context, True)
+		return ConversationHandler.END
+	elif firewall_limits[1] - context.user_data["attempts"] <  firewall_limits[0] - context.user_data["success"]:
+		end_firewall_game(update, context, False)
+		return ConversationHandler.END
+
+#Deciding if a message pass trough the firewall...
+def trough_firewall(message, user_data):
+	return pl.check_firewall(user_data["algorithm"], message, user_data["parameters"])
+
+#Ending a firewall game...
+def end_firewall_game(update, context, victory):
+	id = update.effective_chat.id
+	logging.info(hide_id(id) + " ended a firewall game: " + str(victory))
+	m = msg.end_firewall_message(victory, context.user_data["command"])
+	if victory:
+		sticker = ass.get_sticker_id(0)
+	else:
+		sticker = ass.get_sticker_id(2)
+	context.bot.send_sticker(chat_id=id, sticker=sticker)
+	context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	context.user_data.clear()
+
+#Loading firewall round data...
+def load_firewall(user_data):
+	user_data["attempts"] = 0
+	user_data["success"] = 0
+	firewall = pl.get_firewall_game()
+	keys = list(firewall)
+	for k in keys:
+		user_data[k] = firewall[k]
+
 #Sending a palindromo for the user...
 def send_palindromo(update, context):
 	id = update.effective_chat.id
@@ -189,7 +243,7 @@ def save_minor_number(update, context):
 				except:
 					name = fn
 				logging.info(hide_id(id) + " playing a move in minor number game...")
-				if gm.save_minor_number(number, name, id): #Saving a move... Returns False if the player played before in the round...
+				if pl.save_minor_number(number, name, id): #Saving a move... Returns False if the player played before in the round...
 					context.bot.send_message(chat_id=id, text=msg.build_minor_move_message(number, name), parse_mode=ParseMode.HTML)
 				else:
 					context.bot.send_message(chat_id=id, text=msg.get_message("play_double_move"), parse_mode=ParseMode.HTML)
@@ -210,9 +264,9 @@ def end_minor_number(update, context):
 	id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) > 1 and m[1] == config["password"]:
-		winner_exist, number, winner, winner_id = gm.end_minor_game()
+		winner_exist, number, winner, winner_id = pl.end_minor_game()
 		logging.info(hide_id(id) + " ending a minor game round...")
-		end_m = gm.minor_info() + "\n\n" + \
+		end_m = pl.minor_info() + "\n\n" + \
 				msg.build_minor_game_message(winner_exist, number, winner)
 		context.bot.send_message(chat_id=id, text=end_m, parse_mode=ParseMode.HTML)
 		try:
@@ -220,7 +274,7 @@ def end_minor_number(update, context):
 				context.bot.send_message(chat_id=winner_id, text=msg.build_minor_victory_message(number), parse_mode=ParseMode.HTML)
 				context.bot.send_sticker(chat_id=winner_id, sticker=ass.get_sticker_id(0))
 				logging.info("Game round victory notification sent")
-			loosers = gm.get_minor_loosers(winner_id)
+			loosers = pl.get_minor_loosers(winner_id)
 			looser_message = msg.build_minor_loose_message(winner_exist, winner, number)
 			logging.info("Notifying loosers of a minor game round")
 			for l in loosers:
@@ -228,7 +282,7 @@ def end_minor_number(update, context):
 				context.bot.send_sticker(chat_id=l, sticker=ass.get_sticker_id(2))
 		except:
 			logging.info("Problems during game round notifications.")
-		gm.minor_reset()
+		pl.minor_reset()
 	else:
 		logging.info(hide_id(id) + " wanted to end a game round without the password...")
 		context.bot.send_message(chat_id=id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
@@ -238,7 +292,7 @@ def minor_number_info(update, context):
 	id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) > 1 and m[1] == config["password"]:
-		m = gm.minor_info()
+		m = pl.minor_info()
 		context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
 	else:
 		logging.info(hide_id(id) + " wanted to check a game round state...")
@@ -247,8 +301,14 @@ def minor_number_info(update, context):
 #Triggering /help command...
 def print_help(update, context):
 	id = update.effective_chat.id
-	logging.info(hide_id(id) + " asked for help...")
-	context.bot.send_message(chat_id=id, text=msg.build_help_message(), parse_mode=ParseMode.HTML)
+	m = update.message.text.split(" ")
+	if len(m) == 2:
+		logging.info(hide_id(id) + " asked for help type: " + m[1])
+		type = m[1].lower().translate(translation)
+		context.bot.send_message(chat_id=id, text=msg.build_custom_help_message(type), parse_mode=ParseMode.HTML)
+	else:
+		logging.info(hide_id(id) + " asked for help...")
+		context.bot.send_message(chat_id=id, text=msg.build_help_message(), parse_mode=ParseMode.HTML)
 
 #Triggering /info command...
 def print_info(update, context):
@@ -263,7 +323,7 @@ def wrong_message(update, context):
 	context.bot.send_message(chat_id=id, text=msg.get_message("wrong"), parse_mode=ParseMode.HTML)
 
 #Deciding what function to trigger after a button click...
-def button_click(update, context):
+def conversation_button_click(update, context):
 	query = update.callback_query
 	query.answer()
 	if query.data == "hint":
@@ -299,9 +359,11 @@ def hide_id(id):
 #Building the conversation handler...
 def build_conversation_handler():
 	handler = ConversationHandler(
-		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("acertijo", start_acertijo)],
+		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("acertijo", start_acertijo),
+					CommandHandler("firewall", start_firewall)],
 		states={TRYING:[MessageHandler(Filters.text & ~Filters.command, check_try),
-					CallbackQueryHandler(button_click)]},
+					CallbackQueryHandler(conversation_button_click)],
+				FIREWALL: [MessageHandler(Filters.text & ~Filters.command, check_firewall)]},
 				fallbacks=[MessageHandler(Filters.command, cancel_challenge)])
 	return handler
 

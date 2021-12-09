@@ -1,3 +1,4 @@
+import random as rd
 import json as js
 
 class Messages():
@@ -55,6 +56,34 @@ class Messages():
 		if not explanation == None:
 			m += explanation + "\n\n"
 		m += "¿Quérés seguir? Mandá /" + type
+		return m
+
+	#Building the message to start a firewall round...
+	def build_start_firewall_message(self, ex_pass, ex_notpass):
+		m = self.get_message("start_firewall")
+		m += "En este momento el mensaje <b>| " + ex_pass + " |</b> pasa. En cambio, " + \
+			"el mensaje <b>| " + ex_notpass + " |</b> es bloqueado."
+		return m
+
+	#Building the message to answer a firewall move...
+	def answer_firewall_message(self, correct, message):
+		m = ""
+		if correct:
+			m = "<b>| " + message.capitalize() + " |</b> "
+			m += rd.choice(self.get_message("correct_firewall_answer").split(";"))
+		else:
+			m = rd.choice(self.get_message("wrong_firewall_answer").split(";"))
+		return m
+
+	#Building end firewall message...
+	def end_firewall_message(self, victory, command):
+		m = ""
+		if victory:
+			m = self.get_message("firewall_victory")
+		else:
+			m = self.get_message("firewall_defeat")
+		m += "\n\n"
+		m += "¿Quérés seguir? Mandá /" + command
 		return m
 
 	#Building the message to share a youtube video...
@@ -117,5 +146,28 @@ class Messages():
 			"> Mandame /palindromo para que te sorprenda con una oración que se lee al derecho y al revés.\n" + \
 			"> Mandame /reversible seguido de un número si querés ver un número escrito de manera reversible.\n" + \
 			"> Mandame /jugarmenor seguido de un número para participar de una ronda del <i>juego del menor número</i>.\n" + \
-			"> Mandame /video si querés que comparta con vos un video de algunas de las charlas del festival."
+			"> Mandame /video si querés que comparta con vos un video de algunas de las charlas del festival.\n\n" + \
+			"Podés mandarme /help seguido de <i>menor</i>, <i>promedio</i> o <i>firewall</i> si necesitás ayuda " + \
+			"con alguno de esos juegos."
+		return m
+
+	#The message triggered with /help custom command...
+	def build_custom_help_message(self, type):
+		m = "No tengo ninguna ayuda especial para el argumento " + type + "."
+		if type == "menor":
+			m = "Para jugar una ronda del <b>juego del menor número</b> tenés que mandarme:\n" + \
+				"/jugar n (n es un número natural).\n" + \
+				"Cuando un <i>administrador</i> decide dar por finalizada una ronda yo te voy a mandar un mensaje. " + \
+				"Gana el jugador que haya enviado el menor número que haya sido único.\n\nEjemplo: " + \
+				"Juan manda el 5, Camila manda el 3, Martín manda el 6, Susana manda el 5 y Jorge manda el 3. " + \
+				"Gana Martín, porque el 6 es el menor número enviado una única vez.\n" + \
+				"Espero tu jugada. ¡Suerte!"
+		elif type == "promedio":
+			m = "Perdón pero aún no implementé este juego. En realidad es mi programador quien lo tiene que hacer."
+		elif type == "firewall":
+			m = "No necesitás compañía para jugar al <b>firewall</b>. La idea es que existe, mientras dura el juego, " + \
+				"un <i>firewall</i> que deja pasar sólo algunos de los mensajes que me enviás. Tenés que descubrir " + \
+				"qué condición cumplen los mensajes que sí pasan. Si lográs pasar a través del <i>firewall</i> 5 mensajes " + \
+				"ganás una ronda. ¡Me olvidaba! Tenés 15 oportunidades.\n" + \
+				"Mandame /firewall y empezá a jugar."
 		return m
