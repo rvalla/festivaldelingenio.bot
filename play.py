@@ -1,7 +1,8 @@
 import json as js
 import logging
+import random as rd
 
-class Game():
+class Play():
 	"The class the bot use let users to play..."
 
 	def __init__(self):
@@ -9,6 +10,7 @@ class Game():
 		self.minor_numbers = set() #A set with all numbers played...
 		self.minor_players_moves = {} #A dictionary which maps numbers with players...
 		self.minor_players_ids = set() #The set of all players in a round...
+		self.firewall = open("assets/firewall.csv").readlines()[1:]
 		self.logger = logging.getLogger(__name__)
 
 	#Saving a minor number move...
@@ -68,3 +70,75 @@ class Game():
 		self.minor_numbers.clear()
 		self.minor_players_moves.clear()
 		self.minor_players_ids.clear()
+
+	#Deciding if a move in firewalls game is good...
+	def check_firewall(self, algorithm, move, parameters=[]):
+		if algorithm == 0:
+			return self.check_firewall_range(move, parameters)
+		elif algorithm == 1:
+			return self.check_firewall_remainder(move, parameters)
+		elif algorithm == 2:
+			return self.check_firewall_letter_count(move, parameters[0])
+		elif algorithm == 3:
+			return self.check_firewall_letter_ends(move, parameters)
+		elif algorithm == 4:
+			return self.check_firewall_split(move, parameters)
+
+	#Checking a move in firewall's game: number range type...
+	def check_firewall_range(self, move, range):
+		good_move = False
+		if move > range[0] and move < range[1]:
+			good_move = True
+		return good_move
+
+	#Checking a move in firewall's game: number remainder type...
+	def check_firewall_remainder(self, move, values):
+		good_move = False
+		if move%values[0] == values[1]:
+			good_move = True
+		return good_move
+
+	#Checking a move in firewall's game: letter count type...
+	def check_firewall_letter_count(self, move, count):
+		good_move = False
+		if len(move) == count:
+			good_move = True
+		return good_move
+
+	#Checking a move in firewall's game: letter ends type...
+	def check_firewall_letter_ends(self, move, letters):
+		good_move = False
+		if move[0] == letters[0] and move[len(move)-1] == letters[1]:
+			good_move = True
+		return good_move
+
+	#Checking a move in firewall's game: symbol count type...
+	def check_firewall_split(self, move, values):
+		good_move = False
+		if len(move.split(values[1])) == int(values[0]):
+			good_move = True
+		return good_move
+
+	#Building a firewall's challenge for words of n letters...
+	def get_firewall_game(self):
+		data = rd.choice(self.firewall[10:]).split(";")
+		round = {}
+		round["command"] = data[0]
+		round["type"] = data[1]
+		round["algorithm"] = int(data[2])
+		round["ex_pass"] = data[3]
+		round["ex_notpass"] = data[4]
+		round["in_type"] = data[5]
+		round["parameters"] = self.firewall_parameters(data[6], data[7])
+		return round
+
+	#Building a firewalls challenge parameters list...
+	def firewall_parameters(self, parameters_type, data):
+		in_l = data.split(",")
+		out_l = []
+		if parameters_type == "numbers":
+			for i in in_l:
+				out_l.append(int(i))
+		else:
+			out_l = in_l
+		return out_l
