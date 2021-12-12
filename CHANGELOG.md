@@ -2,6 +2,12 @@
 
 # Festival del Ingenio Bot: changelog
 
+## 2021-12-12: v0.7 beta
+
+Several changes were done related to groups. Some to solve bugs when is a group who chats withe the bot.
+Data of the *challenges* are stored now in *chat_data* dictionary. Some new secret commands were added.
+New **Usage()** class is in charge of saving data of bot's usage.
+
 ## 2021-12-09: v0.6 beta
 
 New assets were added. **Game()** class is bigger and has new name: **Play()**, a change that make sense since

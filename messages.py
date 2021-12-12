@@ -61,15 +61,15 @@ class Messages():
 	#Building the message to start a firewall round...
 	def build_start_firewall_message(self, ex_pass, ex_notpass):
 		m = self.get_message("start_firewall")
-		m += "El mensaje <b>| " + ex_pass + " |</b> logra atravesar el <i>firewall</i>. En cambio, " + \
-			"el mensaje <b>| " + ex_notpass + " |</b> es bloqueado."
+		m += "El mensaje <b>&lt;&lt;" + ex_pass + "&gt;&gt;</b> logra atravesar el <i>firewall</i>. En cambio, " + \
+			"el mensaje <b>&lt;&lt;" + ex_notpass + "&gt;&gt;</b> es bloqueado."
 		return m
 
 	#Building the message to answer a firewall move...
 	def answer_firewall_message(self, correct, message):
 		m = ""
 		if correct:
-			m = "<b>| " + message.capitalize() + " |</b> "
+			m = "<b>&lt;&lt;" + message.capitalize() + "&gt;&gt;</b> "
 			m += rd.choice(self.get_message("correct_firewall_answer").split(";"))
 		else:
 			m = rd.choice(self.get_message("wrong_firewall_answer").split(";"))
