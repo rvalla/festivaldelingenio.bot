@@ -13,3 +13,7 @@ firewall;words;4;mi sombra;la de otro;word;letters;2, ;2
 firewall;words;4;una flor amarilla;una flor y una hoja;word;letters;3, ;2
 firewall;words;4;semana;mes;word;letters;3,a;2
 firewall;words;4;3464;1234;word;letters;3,4;2
+firewall;words;5;caracol;camastro;word;letters;0,c,2,r;5
+firewall;numbers;0;31;30;number;numbers;30,45;0
+firewall;words;5;14256;8345;word;letters;0,1,2,2,4,6;5
+firewall;words;5;furioso;enojado;word;letters;1,u,3,i;5

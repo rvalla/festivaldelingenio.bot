@@ -1,4 +1,3 @@
-import os
 import random as rd
 
 class Assets():
@@ -11,14 +10,14 @@ class Assets():
 		self.palindromos = open("assets/text/palindromos.txt").readlines()
 		self.reverse_numbers = open("assets/data_reverse_numbers.csv").readlines()[1:]
 		self.videos = open("assets/videos.csv").readlines()[1:]
-		self.last_sended = [0,0,0,0,0]
+		self.last_sent = [0,0,0,0,0]
 		self.available = self.build_available_limits()
 		self.stickers_ids = self.build_sticker_matrix("assets/stickers.csv")
 
 	#Returning a text line from rebuses.csv database...
 	def get_rebus_data(self):
 		self.next_to_send(0)
-		return self.rebuses[self.last_sended[0]]
+		return self.rebuses[self.last_sent[0]]
 
 	#Returning the image from a rebus...
 	def open_rebus_image(self, path):
@@ -27,19 +26,19 @@ class Assets():
 	#Returning a line in adivinanzas.csv database...
 	def get_acertijo_data(self):
 		self.next_to_send(1)
-		return self.acertijos[self.last_sended[1]]
+		return self.acertijos[self.last_sent[1]]
 
 	#Returning a random palindromo...
 	def get_palindromo(self):
 		self.next_to_send(2)
-		m = self.palindromos[self.last_sended[2]]
+		m = self.palindromos[self.last_sent[2]]
 		m += m[::-1]
 		return m
 
 	#Returning data from a reverse number...
 	def get_random_reverse_number(self):
 		self.next_to_send(3)
-		return self.reverse_numbers[self.last_sended[3]]
+		return self.reverse_numbers[self.last_sent[3]]
 
 	def get_reverse_number(self, n):
 		return self.reverse_numbers[n-1]
@@ -47,7 +46,7 @@ class Assets():
 	#Returning a line in videos.csv database...
 	def get_video_data(self):
 		self.next_to_send(4)
-		return self.videos[self.last_sended[4]]
+		return self.videos[self.last_sent[4]]
 
 	#Returning file_id of a sticker of the requested category (victory, hint, loose)...
 	def get_sticker_id(self, code):
@@ -65,7 +64,7 @@ class Assets():
 
 	#Deciding what asset to send...
 	def next_to_send(self, category):
-		self.last_sended[category] = (self.last_sended[category] + rd.randint(1,7)) % self.available[category]
+		self.last_sent[category] = (self.last_sent[category] + rd.randint(1,7)) % self.available[category]
 
 	#Building the matrix to store stickers database...
 	def build_sticker_matrix(self, path):
