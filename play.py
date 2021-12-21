@@ -12,9 +12,8 @@ class Play():
 		self.minor_numbers = set() #A set with all numbers played...
 		self.minor_players_moves = {} #A dictionary which maps numbers with players...
 		self.minor_players_ids = set() #The set of all players in a round...
-		self.last_firewall = 0 #The last firewall which was sent...
-		self.firewall = open("assets/firewall.csv").readlines()[1:]
-		self.available = len(self.firewall) #Total firewalls available...
+		self.last_firewall = [0,0,0] #The last firewall which was sent...
+		self.firewall, self.availables = self.load_firewalls() #Loading firewall database and total availables...
 		self.logger = logging.getLogger(__name__)
 
 	#Saving a minor number move...
@@ -105,11 +104,13 @@ class Play():
 		elif algorithm == 2:
 			return self.check_firewall_letter_count(move, parameters[0])
 		elif algorithm == 3:
-			return self.check_firewall_letter_ends(move, parameters)
+			return self.check_firewall_positions(move, parameters)
 		elif algorithm == 4:
 			return self.check_firewall_split(move, parameters)
 		elif algorithm == 5:
-			return self.check_firewall_positions(move, parameters)
+			return self.check_firewall_sum(move, parameters[0])
+		elif algorithm == 6:
+			return self.check_firewall_positions_sum(move, parameters)
 
 	#Checking a move in firewall's game: number range type...
 	def check_firewall_range(self, move, range):
@@ -132,10 +133,16 @@ class Play():
 			good_move = True
 		return good_move
 
-	#Checking a move in firewall's game: letter ends type...
-	def check_firewall_letter_ends(self, move, letters):
+	#Checking a move in firewall's game: symbol position type...
+	def check_firewall_positions(self, move, parameters):
 		good_move = False
-		if move[0] == letters[0] and move[len(move)-1] == letters[1]:
+		loop_size = len(parameters)//2
+		move_size = len(move)
+		count = 0
+		for i in range(loop_size):
+			if move[int(parameters[2*i])%move_size] == parameters[2*i+1]:
+				count += 1
+		if count == loop_size:
 			good_move = True
 		return good_move
 
@@ -146,25 +153,32 @@ class Play():
 			good_move = True
 		return good_move
 
-	#Checking a move in firewall's game: symbol position type...
-	def check_firewall_positions(self, move, parameters):
+	#Checking a movi in firewall's game: total digit sum...
+	def check_firewall_sum(self, move, result):
 		good_move = False
-		loop_size = len(parameters)//2
-		count = 0
-		try:
-			for i in range(loop_size):
-				if move[int(parameters[2*i])] == parameters[2*i+1]:
-					count += 1
-		except:
-			pass
-		if count == loop_size:
+		s = 0
+		for d in move:
+			s += int(d)
+		if s == result:
+			good_move = True
+		return good_move
+
+	#Checking a movi in firewall's game: total digit positions sum...
+	def check_firewall_positions_sum(self, move, parameters):
+		good_move = False
+		loop_size = len(parameters) - 1
+		move_size = len(move)
+		s = 0
+		for i in range(loop_size):
+			s += int(move[parameters[i]%move_size])
+		if s == parameters[len(parameters)-1]:
 			good_move = True
 		return good_move
 
 	#Building a firewall's challenge for words of n letters...
-	def get_firewall_game(self):
-		self.next_to_send()
-		data = self.firewall[self.last_firewall].split(";")
+	def get_firewall_game(self, difficulty):
+		self.next_firewall_to_send(difficulty)
+		data = self.firewall[difficulty][self.last_firewall[difficulty]].split(";")
 		round = {}
 		round["command"] = data[0]
 		round["type"] = data[1]
@@ -187,5 +201,26 @@ class Play():
 		return out_l
 
 	#Selecting next firewall to send...
-	def next_to_send(self):
-		self.last_firewall = (self.last_firewall + rd.randint(1,7)) % self.available
+	def next_firewall_to_send(self, difficulty):
+		self.last_firewall[difficulty] = (self.last_firewall[difficulty] + rd.randint(1,4)) % self.availables[difficulty]
+
+	#Building firewall database...
+	def load_firewalls(self):
+		firewalls = []
+		easy = []
+		medium = []
+		hard = []
+		file = open("assets/firewall.csv").readlines()[1:]
+		for l in file:
+			data = l.split(";")
+			if int(data[8]) == 0:
+				easy.append(l)
+			elif int(data[8]) == 1:
+				medium.append(l)
+			elif int(data[8]) == 2:
+				hard.append(l)
+		availables = [len(easy), len(medium), len(hard)]
+		firewalls.append(easy)
+		firewalls.append(medium)
+		firewalls.append(hard)
+		return firewalls, availables

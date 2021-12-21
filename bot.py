@@ -13,7 +13,7 @@ us = Usage("usage.csv") #The class to store usage data...
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
 pl = Play("games.csv") #The class to let the users play some game...
-TRYING, FIREWALL = range(2) #Conversation states...
+LEVEL, TRYING, FIREWALL = range(3) #Conversation states...
 rebus_keys = ["command", "type","animated","words","solution","explanation","hint","file_id","path"] #Keys to load rebus data...
 acertijo_keys = ["command", "type","words","solution_type","statement","solution","explanation","hint"] #Keys to load acertijo data...
 firewall_keys = ["command", "type", ]
@@ -148,18 +148,27 @@ def cancel_challenge(update, context):
 	context.chat_data.clear()
 	return ConversationHandler.END
 
-#Starting a firewall game round...
-def start_firewall(update, context):
+#Selecting firewall difficulty and starting challenge...
+def selecting_firewall(update, context):
 	id = update.effective_chat.id
-	load_firewall(context.chat_data)
+	keyboard = [[InlineKeyboardButton(text="Fácil", callback_data="f_0"),
+				InlineKeyboardButton(text="Difícil", callback_data="f_1"),
+				InlineKeyboardButton(text="Durísimo", callback_data="f_2")]]
+	reply = InlineKeyboardMarkup(keyboard)
+	context.bot.send_message(chat_id=id, text=msg.get_message("present_firewall"), reply_markup=reply, parse_mode=ParseMode.HTML)
+	return LEVEL
+
+#Starting a firewall game round...
+def start_firewall(update, context, difficulty):
+	id = update.effective_chat.id
+	load_firewall(context.chat_data, difficulty)
 	m = msg.build_start_firewall_message(context.chat_data["ex_pass"], context.chat_data["ex_notpass"])
 	context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
-	return FIREWALL
 
 #Checking a firewall move...
 def check_firewall(update, context):
 	id = update.effective_chat.id
-	input = update.message.text.lower()
+	input = update.message.text.lower().translate(translation)
 	if input not in context.chat_data["moves"]:
 		context.chat_data["attempts"] += 1
 		success = trough_firewall(input, context.chat_data)
@@ -208,8 +217,8 @@ def firewall_cheat_detected(update, context):
 	context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(3))
 
 #Loading firewall round data...
-def load_firewall(chat_data):
-	firewall = pl.get_firewall_game()
+def load_firewall(chat_data, difficulty):
+	firewall = pl.get_firewall_game(difficulty)
 	keys = list(firewall)
 	for k in keys:
 		chat_data[k] = firewall[k]
@@ -367,6 +376,10 @@ def conversation_button_click(update, context):
 	elif query.data == "solution":
 		send_solution(update, context)
 		return ConversationHandler.END
+	elif query.data.startswith("f"):
+		d = int(query.data.split("_")[1])
+		start_firewall(update, context, d)
+		return FIREWALL
 
 #Sending a message to bot admin when an error occur...
 def error_notification(update, context):
@@ -418,8 +431,9 @@ def hide_id(id):
 def build_conversation_handler():
 	handler = ConversationHandler(
 		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("acertijo", start_acertijo),
-					CommandHandler("firewall", start_firewall)],
-		states={TRYING:[MessageHandler(Filters.text & ~Filters.command, check_try),
+					CommandHandler("firewall", selecting_firewall)],
+		states={LEVEL: [CallbackQueryHandler(conversation_button_click)],
+				TRYING:[MessageHandler(Filters.text & ~Filters.command, check_try),
 					CallbackQueryHandler(conversation_button_click)],
 				FIREWALL: [MessageHandler(Filters.text & ~Filters.command, check_firewall)]},
 				fallbacks=[MessageHandler(Filters.command, cancel_challenge)],
