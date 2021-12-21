@@ -22,6 +22,7 @@ class Usage():
 		self.help = [0,0,0,0] #help, minor, average, firewall
 		self.info = 0
 		self.wrong_message = 0
+		self.errors = 0
 
 	#Building usage information message...
 	def build_usage_message(self):
@@ -37,7 +38,8 @@ class Usage():
 			"video: " + str(self.video) + "\n" + \
 			"help: " + str(self.help) + "\n" + \
 			"info: " + str(self.info) + "\n" + \
-			"wrong_message: " + str(self.wrong_message)
+			"wrong_message: " + str(self.wrong_message) + "\n" \
+			"errors: " + str(self.errors)
 		return m
 
 	#Saving usage to file...
@@ -50,6 +52,7 @@ class Usage():
 		line = self.build_usage_line(date, interval)
 		file.write(line)
 		file.close()
+		self.reset()
 
 	#Building a data line to save...
 	def build_usage_line(self, date, interval):
@@ -66,7 +69,8 @@ class Usage():
 		line += str(self.video) + ";"
 		line += str(self.help) + ";"
 		line += str(self.info) + ";"
-		line += str(self.wrong_message) + "\n"
+		line += str(self.wrong_message) + ";"
+		line += str(self.errors) + "\n"
 		return line
 
 	#Registering a new start command...
