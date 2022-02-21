@@ -36,8 +36,8 @@ class Play():
 	#Looking for a minor number round winner...
 	def end_minor_game(self):
 		winner_exist = False
-		winner = "Jaime Poniachik"
-		number = "pi * ln(e)"
+		winner = "Nadie"
+		number = "número único"
 		id = None
 		for n in range(1,300):
 			if n in self.minor_numbers:

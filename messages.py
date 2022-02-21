@@ -108,7 +108,7 @@ class Messages():
 		if winner_exist:
 			m += "El ganador de esta ronda es " + \
 				"<b>" + winner + "</b> " + \
-				"con el número <b>" + number + "</b>"
+				"con el número <b>" + number + "</b>."
 		else:
 			m += "DESIERTA"
 		return m
@@ -123,7 +123,7 @@ class Messages():
 	def build_minor_loose_message(self, winner_exist, name, number):
 		m = self.get_message("play_minor_number_loose") + "\n"
 		if winner_exist:
-			m += "Ganó <b>" + name + "</b> con el número <b>" + number + "</b>"
+			m += "Ganó <b>" + name + "</b> con el número <b>" + number + "</b>."
 		else:
 			m += "Esta ronda quedó desierta. <b>" + name + "</b> jugó <b>" + number + "</b>."
 		return m
