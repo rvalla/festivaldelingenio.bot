@@ -70,7 +70,8 @@ class Play():
 	def save_minor(self, winner, winner_n):
 		file = open(self.output_path, "a")
 		t = dt.datetime.now()
-		line = str(t.year) + "-" + str(t.month) + "-" + str(t.day)
+		line = str(t.year) + "-" + str(t.month) + "-" + str(t.day) + ";"
+		line += "minor unique number;"
 		line += str(self.minor_moves) + ";"
 		line += str(len(self.minor_numbers)) + ";"
 		line += winner + ";"
