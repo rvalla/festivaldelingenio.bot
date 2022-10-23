@@ -10,3 +10,15 @@ date;game;moves;numbers;winner;winner_n;numberlist
 2022-2-23;minor unique number;19;8;Rodolfo Kurchan;7;{1, 2, 3, 4, 5, 6, 7, 9}
 2022-2-25;minor unique number;4;3;Fernando Chorny;3;{1, 3, 6}
 2022-8-6;minor unique number;1;1;Rodrigo Valla;14;{14}
+2022-10-1;minor unique number;2;2;Juan Pablo;2;{2, 7}
+2022-10-1;minor unique number;2;2;Juli Garbulsky;2;{2, 5}
+2022-10-1;minor unique number;2;1;Nadie;número único;{3}
+2022-10-1;minor unique number;0;0;Nadie;número único;set()
+2022-10-1;minor unique number;1;1;Juan Pablo;3;{3}
+2022-10-1;minor unique number;2;2;Juli Garbulsky;1;{8889, 1}
+2022-10-1;minor unique number;1;1;Juan Pablo;3;{3}
+2022-10-1;minor unique number;1;1;Rodrigo Valla;10;{10}
+2022-10-18;minor unique number;1;1;Juan Pablo;6;{6}
+2022-10-23;minor unique number;1;1;Rodrigo Valla;10;{10}
+2022-10-23;minor unique number;2;1;Nadie;número único;{10};[10, 10]
+2022-10-23;minor unique number;2;2;Rodrigo Valla;10;{10, 11};[10, 11]

@@ -22,20 +22,20 @@ class Messages():
 	#Building the message to start a rebus challenge...
 	def build_rebus_message(self, type, w):
 		if w == "1":
-			m = "<b>"+ type + ":</b> " + w + " palabra"
+			m = self.bold(type + ": ") + w + " palabra"
 		else:
-			m = "<b>"+ type + ":</b> " + w + " palabras"
+			m = self.bold(type + ": ") + w + " palabras"
 		return m
 
 	#Building the message to start an acertijo challenge...
 	def build_acertijo_message(self, t, statement):
-		m = "<b>ADIVINANZA</b>\n\n"
-		m += "<i>" + statement + "</i>"
+		m = self.bold("ADIVINANZA") + "\n\n"
+		m += self.italic(statement)
 		return m
 
 	#Building the message to send a hint...
 	def build_hint_message(self, hint):
-		m = "<b>Pista:</b> " + hint
+		m = self.bold("Pista: ") + hint
 		return m
 
 	#Building congratulation message inviting the user to play again...
@@ -52,7 +52,7 @@ class Messages():
 
 	#Building the message to send the solution from a challenge...
 	def build_solution_message(self, solution, type, explanation):
-		m = "<b>Solución:</b> " + solution + "\n"
+		m = self.bold("Solución: ") + solution + "\n"
 		if not explanation == None:
 			m += explanation + "\n\n"
 		m += "¿Quérés seguir? Mandá /" + type
@@ -61,15 +61,15 @@ class Messages():
 	#Building the message to start a firewall round...
 	def build_start_firewall_message(self, ex_pass, ex_notpass):
 		m = self.get_message("start_firewall")
-		m += "El mensaje <b>| " + ex_pass + " |</b> logra atravesar el <i>firewall</i>. En cambio, " + \
-			"el mensaje <b>| " + ex_notpass + " |</b> es bloqueado."
+		m += "El mensaje " + self.bold("| " + ex_pass + " | ") + " logra atravesar el " + self.italic("firewall") + \
+			". En cambio, el mensaje " + self.bold("| " + ex_notpass + " | ") + "es bloqueado."
 		return m
 
 	#Building the message to answer a firewall move...
 	def answer_firewall_message(self, correct, message):
 		m = ""
 		if correct:
-			m = "<b>| " + message.capitalize() + " |</b> "
+			m = self.bold("| " + message.capitalize() + " | ")
 			m += rd.choice(self.get_message("correct_firewall_answer").split(";"))
 		else:
 			m = rd.choice(self.get_message("wrong_firewall_answer").split(";"))
@@ -89,26 +89,26 @@ class Messages():
 	#Building the message to share a youtube video...
 	def build_video_message(self, video_data):
 		data = video_data.split(";")
-		m = "Del <b>" + data[0] + " Festival del Ingenio</b>, elegí la charla de " + \
-			"<b>" + data[2] + "</b>:" + "\n\n" + \
-			"<b><a href='" + data[5] + "'>" + data[3] + "</a></b>\n" + \
-			"<i>" + data[4] + "</i>"
+		m = "Del " + self.bold(data[0] + " Festival del Ingenio") + ", elegí la charla de " + \
+			self.bold(data[2]) + ":\n\n" + \
+			self.bold("<a href='" + data[5] + "'>" + data[3] + "</a>\n") + \
+			self.italic(data[4])
 		return m
 
 	#Building the message to confirm a game move...
 	def build_minor_move_message(self, number, name):
 		m = self.get_message("play_minor_number_move") + "\n"
-		m += "Tu nombre: <b>" + name + "</b>\n"
-		m += "Tu número: <b>" + str(number) + "</b>"
+		m += "Tu nombre: " + self.bold(name) + "\n"
+		m += "Tu número: " + self.bold(str(number))
 		return m
 
 	#Building the message to inform a winner to the admin...
 	def build_minor_game_message(self, winner_exist, number, winner):
-		m = "<b>Ronda del juego finalizada</b>\n"
+		m = self.bold("Ronda del juego finalizada\n")
 		if winner_exist:
 			m += "El ganador de esta ronda es " + \
-				"<b>" + winner + "</b> " + \
-				"con el número <b>" + number + "</b>."
+				self.bold(winner + " ") + \
+				"con el número " + self.bold(number) + "."
 		else:
 			m += "DESIERTA"
 		return m
@@ -116,16 +116,16 @@ class Messages():
 	#Building the message to inform a victory...
 	def build_minor_victory_message(self, number):
 		m = self.get_message("play_minor_number_victory") + "\n" + \
-			"Tu número ganador fue el <b>" + number + "</b>."
+			"Tu número ganador fue el " + self.bold(number) + "."
 		return m
 
 	#Building the message to inform a victory...
 	def build_minor_loose_message(self, winner_exist, name, number):
 		m = self.get_message("play_minor_number_loose") + "\n"
 		if winner_exist:
-			m += "Ganó <b>" + name + "</b> con el número <b>" + number + "</b>."
+			m += "Ganó " + self.bold(name) + "  con el número " + self.bold(number) + "."
 		else:
-			m += "Esta ronda quedó desierta. <b>" + name + "</b> jugó <b>" + number + "</b>."
+			m += "Esta ronda quedó desierta. " + self.bold(name) + " jugó " + self.bold(number) + "."
 		return m
 
 	#The message triggered with /info command...

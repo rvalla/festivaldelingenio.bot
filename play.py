@@ -8,7 +8,8 @@ class Play():
 
 	def __init__(self, path):
 		self.output_path = path
-		self.minor_moves = 0 #Counting number of moves...
+		self.minor_moves_count = 0 #Counting number of moves...
+		self.minor_moves = [] #The list of all moves in minor number game...
 		self.minor_numbers = set() #A set with all numbers played...
 		self.minor_players_moves = {} #A dictionary which maps numbers with players...
 		self.minor_players_ids = set() #The set of all players in a round...
@@ -21,7 +22,8 @@ class Play():
 		moving = False
 		if not id in self.minor_players_ids:
 			moving = True
-			self.minor_moves += 1
+			self.minor_moves_count += 1
+			self.minor_moves.append(number)
 			self.minor_numbers.add(number)
 			self.minor_players_ids.add(id)
 			try:
@@ -61,9 +63,10 @@ class Play():
 	#Returning the actual state of a minor number round...
 	def minor_info(self):
 		m = "<b>Estado del juego</b>\n" + \
-			"Cantidad de jugadas: " + str(self.minor_moves) + "\n" + \
+			"Cantidad de jugadas: " + str(self.minor_moves_count) + "\n" + \
 			"Cantidad de números: " + str(len(self.minor_numbers)) + "\n" + \
-			"Jugadas: " + str(self.minor_numbers)
+			"Números: " + str(self.minor_numbers) + "\n" + \
+			"Jugadas: " + str(self.minor_moves)
 		return m
 
 	#Saving minor game result...
@@ -72,18 +75,19 @@ class Play():
 		t = dt.datetime.now()
 		line = str(t.year) + "-" + str(t.month) + "-" + str(t.day) + ";"
 		line += "minor unique number;"
-		line += str(self.minor_moves) + ";"
+		line += str(self.minor_moves_count) + ";"
 		line += str(len(self.minor_numbers)) + ";"
 		line += winner + ";"
 		line += str(winner_n) + ";"
-		line += str(self.minor_numbers) + "\n"
+		line += str(self.minor_numbers) + ";"
+		line += str(self.minor_moves) + "\n"
 		file.write(line)
 		file.close()
 
 	#Getting ready for a new minor number round...
 	def minor_reset(self):
-		self.logger.info("Reseteando ronda del menor número: " + str(self.minor_moves) + " jugadas, " + str(len(self.minor_numbers)) + " números.")
-		self.minor_moves = 0
+		self.logger.info("Reseteando ronda del menor número: " + str(self.minor_moves_count) + " jugadas, " + str(len(self.minor_numbers)) + " números.")
+		self.minor_moves_count = 0
 		self.minor_numbers.clear()
 		self.minor_players_moves.clear()
 		self.minor_players_ids.clear()

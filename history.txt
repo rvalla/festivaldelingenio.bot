@@ -1363,3 +1363,89 @@ Logging history...
 2022-08-06 16:59:17,147;root;INFO;Game round victory notification sent
 2022-08-06 16:59:17,148;root;INFO;Notifying loosers of a minor game round
 2022-08-06 16:59:17,148;play;INFO;Reseteando ronda del menor número: 1 jugadas, 1 números.
+2022-08-07 22:08:27,052;root;INFO;Setting up a webhook...
+2022-08-07 22:08:27,052;apscheduler.scheduler;INFO;Scheduler started
+2022-08-07 22:11:02,194;root;INFO;Setting up a webhook...
+2022-08-07 22:11:02,195;apscheduler.scheduler;INFO;Scheduler started
+2022-10-01 19:10:04,781;root;INFO;****7732 started the bot...
+2022-10-01 19:10:13,288;root;INFO;An error ocurred! While comunicating with chat ****7732
+2022-10-01 19:10:33,507;root;INFO;An error ocurred! While comunicating with chat ****7732
+2022-10-01 19:10:58,820;play;INFO;Juan Pablo registró una jugada del menor número: 2
+2022-10-01 19:12:04,948;play;INFO;Juli Garbulsky registró una jugada del menor número: 7
+2022-10-01 19:12:37,471;root;INFO;****7732 wanted to check a game round state...
+2022-10-01 19:14:34,116;play;INFO;Juan Pablo ganó una ronda del menor número (2)
+2022-10-01 19:14:34,116;root;INFO;****7732 ending a minor game round...
+2022-10-01 19:14:35,147;root;INFO;Game round victory notification sent
+2022-10-01 19:14:35,147;root;INFO;Notifying loosers of a minor game round
+2022-10-01 19:14:35,825;play;INFO;Reseteando ronda del menor número: 2 jugadas, 2 números.
+2022-10-01 19:15:15,844;play;INFO;Juan Pablo registró una jugada del menor número: 5
+2022-10-01 19:15:25,277;play;INFO;Juli Garbulsky registró una jugada del menor número: 2
+2022-10-01 19:15:30,692;play;INFO;Juli Garbulsky ganó una ronda del menor número (2)
+2022-10-01 19:15:30,692;root;INFO;****7732 ending a minor game round...
+2022-10-01 19:15:31,760;root;INFO;Game round victory notification sent
+2022-10-01 19:15:31,760;root;INFO;Notifying loosers of a minor game round
+2022-10-01 19:15:32,443;play;INFO;Reseteando ronda del menor número: 2 jugadas, 2 números.
+2022-10-01 19:16:45,850;play;INFO;Juan Pablo registró una jugada del menor número: 3
+2022-10-01 19:16:47,789;play;INFO;Juli Garbulsky registró una jugada del menor número: 3
+2022-10-01 19:16:59,731;play;INFO;Termina una ronda del menor número sin ganador
+2022-10-01 19:16:59,732;root;INFO;****7732 ending a minor game round...
+2022-10-01 19:17:00,069;root;INFO;Notifying loosers of a minor game round
+2022-10-01 19:17:01,443;play;INFO;Reseteando ronda del menor número: 2 jugadas, 1 números.
+2022-10-01 19:54:49,188;root;INFO;****3512 wanted to end a game round without the password...
+2022-10-01 19:55:02,138;play;INFO;Termina una ronda del menor número sin ganador
+2022-10-01 19:55:02,138;root;INFO;****3512 ending a minor game round...
+2022-10-01 19:55:02,471;root;INFO;Notifying loosers of a minor game round
+2022-10-01 19:55:02,471;play;INFO;Reseteando ronda del menor número: 0 jugadas, 0 números.
+2022-10-01 19:57:16,604;root;INFO;****7732 failed to play a minor number move...
+2022-10-01 19:57:27,467;root;INFO;****7732 failed to play a minor number move...
+2022-10-01 19:57:32,678;root;INFO;****3512 failed to play a minor number move...
+2022-10-01 19:57:39,052;root;INFO;An error ocurred! While comunicating with chat ****7732
+2022-10-01 19:57:57,342;root;INFO;****3512 failed to play a minor number move...
+2022-10-01 19:58:18,045;root;INFO;An error ocurred! While comunicating with chat ****7732
+2022-10-01 19:58:24,409;root;INFO;An error ocurred! While comunicating with chat ****3512
+2022-10-01 19:58:38,424;root;INFO;An error ocurred! While comunicating with chat ****7732
+2022-10-01 19:58:45,519;root;INFO;An error ocurred! While comunicating with chat ****7732
+2022-10-01 19:58:52,975;root;INFO;****3512 failed to play a minor number move...
+2022-10-01 19:58:58,667;play;INFO;Juan Pablo registró una jugada del menor número: 3
+2022-10-01 19:59:14,504;play;INFO;Juan Pablo intentó registrar una 2da jugada del menor número
+2022-10-01 20:00:03,631;play;INFO;Juan Pablo ganó una ronda del menor número (3)
+2022-10-01 20:00:03,631;root;INFO;****7732 ending a minor game round...
+2022-10-01 20:00:04,770;root;INFO;Game round victory notification sent
+2022-10-01 20:00:04,770;root;INFO;Notifying loosers of a minor game round
+2022-10-01 20:00:04,770;play;INFO;Reseteando ronda del menor número: 1 jugadas, 1 números.
+2022-10-01 20:00:39,551;play;INFO;Juan Pablo registró una jugada del menor número: 8889
+2022-10-01 20:00:54,037;play;INFO;Juan Pablo intentó registrar una 2da jugada del menor número
+2022-10-01 20:03:59,334;play;INFO;Juli Garbulsky registró una jugada del menor número: 1
+2022-10-01 20:04:12,307;play;INFO;Juli Garbulsky ganó una ronda del menor número (1)
+2022-10-01 20:04:12,307;root;INFO;****7732 ending a minor game round...
+2022-10-01 20:04:13,289;root;INFO;Game round victory notification sent
+2022-10-01 20:04:13,289;root;INFO;Notifying loosers of a minor game round
+2022-10-01 20:04:13,942;play;INFO;Reseteando ronda del menor número: 2 jugadas, 2 números.
+2022-10-01 20:04:33,351;root;INFO;****7732 failed to play a minor number move...
+2022-10-01 20:04:47,011;play;INFO;Juan Pablo registró una jugada del menor número: 3
+2022-10-01 20:04:52,184;root;INFO;An error ocurred! While comunicating with chat ****7732
+2022-10-01 20:05:08,429;play;INFO;Juan Pablo ganó una ronda del menor número (3)
+2022-10-01 20:05:08,429;root;INFO;****7732 ending a minor game round...
+2022-10-01 20:05:09,524;root;INFO;Game round victory notification sent
+2022-10-01 20:05:09,524;root;INFO;Notifying loosers of a minor game round
+2022-10-01 20:05:09,524;play;INFO;Reseteando ronda del menor número: 1 jugadas, 1 números.
+2022-10-01 20:20:27,297;play;INFO;Rodrigo Valla registró una jugada del menor número: 10
+2022-10-01 20:20:48,943;play;INFO;Rodrigo Valla ganó una ronda del menor número (10)
+2022-10-01 20:20:48,943;root;INFO;****8891 ending a minor game round...
+2022-10-01 20:20:49,915;root;INFO;Game round victory notification sent
+2022-10-01 20:20:49,915;root;INFO;Notifying loosers of a minor game round
+2022-10-01 20:20:49,915;play;INFO;Reseteando ronda del menor número: 1 jugadas, 1 números.
+2022-10-16 14:55:25,512;root;INFO;****6831 started the bot...
+2022-10-18 16:41:23,714;play;INFO;Juan Pablo registró una jugada del menor número: 6
+2022-10-18 16:41:57,227;root;INFO;****7732 wanted to end a game round without the password...
+2022-10-18 16:42:20,259;play;INFO;Juan Pablo ganó una ronda del menor número (6)
+2022-10-18 16:42:20,259;root;INFO;****7732 ending a minor game round...
+2022-10-18 16:42:21,270;root;INFO;Game round victory notification sent
+2022-10-18 16:42:21,271;root;INFO;Notifying loosers of a minor game round
+2022-10-18 16:42:21,272;play;INFO;Reseteando ronda del menor número: 1 jugadas, 1 números.
+2022-10-23 17:04:13,115;play;INFO;Rodrigo Valla registró una jugada del menor número: 10
+2022-10-23 17:04:21,149;play;INFO;Rodrigo Valla ganó una ronda del menor número (10)
+2022-10-23 17:04:21,149;root;INFO;****8891 ending a minor game round...
+2022-10-23 17:04:22,179;root;INFO;Game round victory notification sent
+2022-10-23 17:04:22,179;root;INFO;Notifying loosers of a minor game round
+2022-10-23 17:04:22,180;play;INFO;Reseteando ronda del menor número: 1 jugadas, 1 números.

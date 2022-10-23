@@ -2,9 +2,14 @@
 
 # Festival del Ingenio Bot: changelog
 
+## 2022-10-23: v0.7.1 beta
+
+Little change in secrets commands of *minor number* game. Now the bot sends all the moves played
+to whoever has finished a round.  
+
 ## 2021-12-12: v0.7 beta
 
-Several changes were done related to groups. Some to solve bugs when is a group who chats withe the bot.
+Several changes were done related to groups. Some to solve bugs when is a group who chats with the bot.
 Data of the *challenges* are stored now in *chat_data* dictionary. Some new secret commands were added.
 New **Usage()** class is in charge of saving data of bot's usage.
 
