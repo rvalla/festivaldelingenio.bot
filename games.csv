@@ -22,3 +22,7 @@ date;game;moves;numbers;winner;winner_n;numberlist
 2022-10-23;minor unique number;1;1;Rodrigo Valla;10;{10}
 2022-10-23;minor unique number;2;1;Nadie;número único;{10};[10, 10]
 2022-10-23;minor unique number;2;2;Rodrigo Valla;10;{10, 11};[10, 11]
+2022-11-3;minor unique number;2;1;Nadie;número único;{1};[10, 1, 1]
+2022-11-3;minor unique number;2;2;Nadie;número único;{3141592, 12345678901234567890};[10, 1, 1, 3141592, 12345678901234567890]
+2022-11-3;minor unique number;2;2;Rodrigo Valla;10;{10, 11};[10, 1, 1, 3141592, 12345678901234567890, 10, 11]
+2022-11-3;minor unique number;2;1;Nadie;número único;{5};[10, 1, 1, 3141592, 12345678901234567890, 10, 11, 5, 5]

@@ -1449,3 +1449,32 @@ Logging history...
 2022-10-23 17:04:22,179;root;INFO;Game round victory notification sent
 2022-10-23 17:04:22,179;root;INFO;Notifying loosers of a minor game round
 2022-10-23 17:04:22,180;play;INFO;Reseteando ronda del menor número: 1 jugadas, 1 números.
+2022-11-03 20:18:56,353;root;INFO;****5413 started the bot...
+2022-11-03 20:21:40,876;play;INFO;Juli Garbulsky registró una jugada del menor número: 1
+2022-11-03 20:22:03,604;play;INFO;Bruno Glecer registró una jugada del menor número: 1
+2022-11-03 20:23:10,857;play;INFO;Termina una ronda del menor número sin ganador
+2022-11-03 20:23:10,857;root;INFO;****3512 ending a minor game round...
+2022-11-03 20:23:11,213;root;INFO;Notifying loosers of a minor game round
+2022-11-03 20:23:12,690;play;INFO;Reseteando ronda del menor número: 2 jugadas, 1 números.
+2022-11-03 20:24:38,897;root;INFO;****5413 failed to play a minor number move...
+2022-11-03 20:24:57,173;play;INFO;Juli Garbulsky registró una jugada del menor número: 3141592
+2022-11-03 20:25:19,536;root;INFO;****5413 failed to play a minor number move...
+2022-11-03 20:25:46,545;play;INFO;Bruno Glecer registró una jugada del menor número: 12345678901234567890
+2022-11-03 20:25:51,833;play;INFO;Termina una ronda del menor número sin ganador
+2022-11-03 20:25:51,833;root;INFO;****3512 ending a minor game round...
+2022-11-03 20:25:52,184;root;INFO;Notifying loosers of a minor game round
+2022-11-03 20:25:53,730;play;INFO;Reseteando ronda del menor número: 2 jugadas, 2 números.
+2022-11-03 20:38:27,812;play;INFO;Rodrigo Valla registró una jugada del menor número: 10
+2022-11-03 20:38:50,339;root;INFO;****7638 failed to play a minor number move...
+2022-11-03 20:38:57,504;play;INFO;RALF Bots Debugging (grupo) registró una jugada del menor número: 11
+2022-11-03 20:39:16,947;play;INFO;Rodrigo Valla ganó una ronda del menor número (10)
+2022-11-03 20:39:16,947;root;INFO;****8891 ending a minor game round...
+2022-11-03 20:39:17,995;root;INFO;Game round victory notification sent
+2022-11-03 20:39:17,995;root;INFO;Notifying loosers of a minor game round
+2022-11-03 20:39:18,707;play;INFO;Reseteando ronda del menor número: 2 jugadas, 2 números.
+2022-11-03 20:41:37,185;play;INFO;Rodrigo Valla registró una jugada del menor número: 5
+2022-11-03 20:41:58,096;play;INFO;RALF Bots Debugging (grupo) registró una jugada del menor número: 5
+2022-11-03 20:42:08,188;play;INFO;Termina una ronda del menor número sin ganador
+2022-11-03 20:42:08,188;root;INFO;****8891 ending a minor game round...
+2022-11-03 20:42:08,538;root;INFO;Notifying loosers of a minor game round
+2022-11-03 20:42:09,916;play;INFO;Reseteando ronda del menor número: 2 jugadas, 1 números.
