@@ -41,7 +41,7 @@ class Play():
 		winner = "Nadie"
 		number = "número único"
 		id = None
-		for n in range(1,300):
+		for n in range(1,1000):
 			if n in self.minor_numbers:
 				if len(self.minor_players_moves[n]) == 1:
 					number = str(n)
@@ -88,6 +88,7 @@ class Play():
 	def minor_reset(self):
 		self.logger.info("Reseteando ronda del menor número: " + str(self.minor_moves_count) + " jugadas, " + str(len(self.minor_numbers)) + " números.")
 		self.minor_moves_count = 0
+		self.minor_moves = []
 		self.minor_numbers.clear()
 		self.minor_players_moves.clear()
 		self.minor_players_ids.clear()
