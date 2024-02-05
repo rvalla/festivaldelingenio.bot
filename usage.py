@@ -125,5 +125,5 @@ class Usage():
 		self.info += 1
 
 	#Registering a messege out of context...
-	def add_wrong_message():
+	def add_wrong_message(self):
 		self.wrong_message += 1

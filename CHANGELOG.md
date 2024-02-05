@@ -2,6 +2,10 @@
 
 # Festival del Ingenio Bot: changelog
 
+## 2024-02-05: v0.8
+
+Now using version 20 of **python telegram-bot**. Ready to add new features...  
+
 ## 2022-10-23: v0.7.1 beta
 
 Little change in secrets commands of *minor number* game. Now the bot sends all the moves played
