@@ -2,6 +2,10 @@
 
 # Festival del Ingenio Bot: changelog
 
+## 2024-02-06: v0.8.1
+
+New **/error** command to allow users to report errors directly.  
+
 ## 2024-02-05: v0.8
 
 Now using version 20 of **python telegram-bot**. Ready to add new features...  

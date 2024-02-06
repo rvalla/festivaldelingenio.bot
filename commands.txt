@@ -9,3 +9,4 @@ reversible - Te mando un número reversible.
 video - Para ver charlas del festival.
 help - Puedo intentar ayudarte...
 info - Puedo enviarte más información.
+error - Reportá cualquier error.

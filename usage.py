@@ -3,8 +3,9 @@ import datetime as dt
 class Usage():
 	"The class to save usage data..."
 
-	def __init__(self, path):
-		self.output_path = path
+	def __init__(self, usage_path, errors_path):
+		self.output_path = usage_path
+		self.errors_path = errors_path
 		self.reset()
 
 	#Resseting data variables...
@@ -22,6 +23,7 @@ class Usage():
 		self.help = [0,0,0,0] #help, minor, average, firewall
 		self.info = 0
 		self.wrong_message = 0
+		self.error_reports = 0
 		self.errors = 0
 
 	#Building usage information message...
@@ -39,6 +41,7 @@ class Usage():
 			"help: " + str(self.help) + "\n" + \
 			"info: " + str(self.info) + "\n" + \
 			"wrong_message: " + str(self.wrong_message) + "\n" \
+			"error reports: " + str(self.error_reports) + "\n" \
 			"errors: " + str(self.errors)
 		return m
 
@@ -70,6 +73,7 @@ class Usage():
 		line += str(self.help) + ";"
 		line += str(self.info) + ";"
 		line += str(self.wrong_message) + ";"
+		line += str(self.error_reports) + ";"
 		line += str(self.errors) + "\n"
 		return line
 
@@ -127,3 +131,18 @@ class Usage():
 	#Registering a messege out of context...
 	def add_wrong_message(self):
 		self.wrong_message += 1
+	
+	#Registering a new error report...
+	def add_error_report(self):
+		self.error_reports += 1
+	
+	#Saving en error report...
+	def save_error_report(self, command, description, user):
+		file = open(self.errors_path, "a")
+		t = dt.datetime.now()
+		date = str(t.year) + "-" + str(t.month) + "-" + str(t.day)
+		file.write(date)
+		file.write(command)
+		file.write(description)
+		file.write(user + "\n")
+		file.close()

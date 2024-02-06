@@ -19,11 +19,11 @@ filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBU
 
 logger = logging.getLogger(__name__)
 config = js.load(open("config.json")) #The configuration .json file (token included)
-us = Usage("usage.csv") #The class to store usage data...
+us = Usage("usage.csv", "errors.csv") #The class to store usage data...
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
 pl = Play("games.csv") #The class to let the users play some game...
-LEVEL, TRYING, FIREWALL = range(3) #Conversation states...
+LEVEL, TRYING, FIREWALL, ERROR_1, ERROR_2 = range(5) #Conversation states...
 rebus_keys = ["command", "type","animated","words","solution","explanation","hint","file_id","path"] #Keys to load rebus data...
 acertijo_keys = ["command", "type","words","solution_type","statement","solution","explanation","hint"] #Keys to load acertijo data...
 firewall_keys = ["command", "type", ]
@@ -370,6 +370,34 @@ async def print_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 	us.add_info()
 	await context.bot.send_message(chat_id=id, text=msg.build_info_message(), parse_mode=ParseMode.HTML)
 
+#Starting an error report session...
+async def trigger_error_submit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+	id = update.effective_chat.id
+	logging.info(str(hide_id(id)) + " wants to report an error...")
+	await context.bot.send_message(chat_id=id, text=msg.get_message("submit_error_1"), parse_mode=ParseMode.HTML)
+	return ERROR_1
+
+#Saving error related command...
+async def report_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+	id = update.effective_chat.id
+	m = update.message.text
+	context.chat_data["error_command"] = m
+	await context.bot.send_message(chat_id=id, text=msg.get_message("submit_error_2"), parse_mode=ParseMode.HTML)
+	return ERROR_2
+
+#Saving error description...
+async def report_error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+	id = update.effective_chat.id
+	m = context.chat_data["error_command"]
+	m2 = update.message.text
+	context.chat_data["error_description"] = m2
+	us.add_error_report()
+	us.save_error_report(m, m2, str(hide_id(id)))
+	admin_msg = "Error reported:\n-command: " + m + "\n-description: " + m2
+	await context.bot.send_message(chat_id=config["admin_id"], text=admin_msg, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=id, text=msg.get_message("submit_error_3"), parse_mode=ParseMode.HTML)
+	return ConversationHandler.END
+
 #Answering a text message out of any conversation...
 async def wrong_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 	if update.message.reply_to_message == None:
@@ -442,11 +470,13 @@ def hide_id(id):
 def build_conversation_handler():
 	handler = ConversationHandler(
 		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("acertijo", start_acertijo),
-					CommandHandler("firewall", selecting_firewall)],
+					CommandHandler("firewall", selecting_firewall), CommandHandler("error", trigger_error_submit)],
 		states={LEVEL: [CallbackQueryHandler(conversation_button_click)],
 				TRYING:[MessageHandler(filters.TEXT & ~filters.COMMAND, check_try),
 					CallbackQueryHandler(conversation_button_click)],
-				FIREWALL: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_firewall)]},
+				FIREWALL: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_firewall)],
+				ERROR_1: [MessageHandler(filters.TEXT, report_command)],
+				ERROR_2: [MessageHandler(filters.TEXT & ~filters.COMMAND, report_error)]},
 				fallbacks=[MessageHandler(filters.COMMAND, cancel_challenge)],
 				per_chat=True, per_user=False, per_message=False)
 	return handler

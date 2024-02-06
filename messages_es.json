@@ -24,6 +24,9 @@
 	"cancel": "Queda cancelado el desafío...",
 	"wrong_cancel": "No hay nada que cancelar che...",
 	"end_challenge": "Doy por terminado el desafío. ¡La seguimos después!",
+	"submit_error_1": "Por favor, decime con qué comando está relacionado el error que vas a reportar.",
+	"submit_error_2": "Contame brevemente de qué se trata el error que me encontraste.",
+	"submit_error_3": "Muchas gracias por tomarte un minuto para mejorarme. Esperemos que @rvalla me arregle pronto.",
 	"error": "Algo salió mal... ¡Qué vergüenza!",
 	"intruder": "No tenés autorización para ejecutar ese comando."
 }
