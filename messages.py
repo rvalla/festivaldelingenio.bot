@@ -85,6 +85,30 @@ class Messages():
 		m += "\n\n"
 		m += "¿Quérés seguir? Mandá /" + command
 		return m
+	
+	#Building level Levenshtein message...
+	def new_leveshtein_level_message(self, tale, level):
+		m1 = self.bold("Desafío de Levenshtein: NIVEL " + str(level))
+		m2 = "Seleccioné una palabra de " + str(level + 1) + " letras del cuento "
+		m2 += self.bold(tale) + " de " + self.bold("Jorge Luis Borges") + ". ¿Podés encontrarla?"
+		return m1, m2
+	
+	#Building Levenshtein move message...
+	def levenshtein_move_message(self, word, distance):
+		m = self.bold(word) + " está a distancia " + self.bold(str(distance)) + " de la balabra que buscás."
+		return m
+
+	#Building Levenshtein words list...
+	def levenshtein_played_words(self, words_list):
+		m = "Durante esta partida te desafié con las siguientes palabras: "
+		words_count = len(words_list)
+		for i in range(words_count):
+			m += words_list[i]
+			if i < words_count - 1:
+				m += ", "
+			else:
+				m += "."
+		return m
 
 	#Building the message to share a youtube video...
 	def build_video_message(self, video_data):
@@ -171,3 +195,10 @@ class Messages():
 				"ganás una ronda. ¡Me olvidaba! Tenés 15 oportunidades.\n" + \
 				"Mandame /firewall y empezá a jugar."
 		return m
+
+	#Printing Messages()...
+	def __str__(self):
+		return "- Festival del ingenio Bot\n" + \
+				"  I am the class in charge of formating text messages...\n" + \
+				"  gitlab.com/rodrigovalla/festivaldelingeniobot\n" + \
+				"  rodrigovalla@protonmail.ch"

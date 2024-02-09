@@ -23,12 +23,13 @@ us = Usage("usage.csv", "errors.csv") #The class to store usage data...
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
 pl = Play("games.csv") #The class to let the users play some game...
-LEVEL, TRYING, FIREWALL, ERROR_1, ERROR_2 = range(5) #Conversation states...
+LEVEL, TRYING, FIREWALL, LEVENSHTEIN, ERROR_1, ERROR_2 = range(6) #Conversation states...
 rebus_keys = ["command", "type","animated","words","solution","explanation","hint","file_id","path"] #Keys to load rebus data...
 acertijo_keys = ["command", "type","words","solution_type","statement","solution","explanation","hint"] #Keys to load acertijo data...
-firewall_keys = ["command", "type", ]
+firewall_keys = ["command", "type"]
 attempts_limit = 2 #Defining the number of attempts before ending a challenge...
 firewall_limits = [5, 13] #Defining victory-loose limits for firewall game...
+levenshtein_base_limit = 10 #Base number of attempts for a Levenshtein challenge...
 vowelsa, vowelsb = "áéíóúü", "aeiouu" #Mapping special characters to check sent solutions...
 translation = str.maketrans(vowelsa, vowelsb)
 
@@ -236,6 +237,63 @@ def load_firewall(chat_data, difficulty):
 	chat_data["success"] = 0
 	chat_data["moves"] = set()
 	chat_data["moves"].add(chat_data["ex_pass"])
+
+#Starting a Levenshtein game...
+async def start_leveshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+	id = update.effective_chat.id
+	context.chat_data["command"] = "levenshtein"
+	context.chat_data["words"] = []
+	await context.bot.send_message(chat_id=id, text=msg.get_message("start_levenshtein"), parse_mode=ParseMode.HTML)
+	await start_levenshtein_level(id, context, 1)
+	return LEVENSHTEIN
+
+#Starting a Levenshtein level...
+async def start_levenshtein_level(id: int, context: ContextTypes.DEFAULT_TYPE, level: int) -> None:
+	load_levenshtein(context.chat_data, level)
+	m1, m2 = msg.new_leveshtein_level_message(context.chat_data["tale"], level)
+	await context.bot.send_message(chat_id=id, text=m1, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=id, text=m2, parse_mode=ParseMode.HTML)
+
+#Checking a levenshtein move...
+async def check_levenshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+	id = update.effective_chat.id
+	move = update.message.text.lower()
+	context.chat_data["attempts"] += 1
+	distance = pl.distance(move, context.chat_data["word"])
+	if distance == 0:
+		if context.chat_data["level"] > 13:
+			await context.bot.send_message(chat_id=id, text=msg.get_message("levenshtein_final_victory"), parse_mode=ParseMode.HTML)
+			await context.bot.send_message(chat_id=id, text=msg.levenshtein_played_words(context.chat_data["words"]), parse_mode=ParseMode.HTML)
+			await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(0))
+			us.add_levenshtein(0)
+			us.add_levenshtein(2)
+			return ConversationHandler.END
+		else:
+			await context.bot.send_message(chat_id=id, text=msg.get_message("levenshtein_level_victory"), parse_mode=ParseMode.HTML)
+			await start_levenshtein_level(id, context, context.chat_data["level"] + 1)
+			us.add_levenshtein(1)
+			return LEVENSHTEIN
+	else:
+		if context.chat_data["attempts"] < (levenshtein_base_limit + (context.chat_data["level"] - 1) * 2): 
+			m = msg.levenshtein_move_message(move, distance)
+			await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+			return LEVENSHTEIN
+		else:
+			await context.bot.send_message(chat_id=id, text=msg.get_message("levenshtein_final_loose"), parse_mode=ParseMode.HTML)
+			await context.bot.send_message(chat_id=id, text=msg.levenshtein_played_words(context.chat_data["words"]), parse_mode=ParseMode.HTML)
+			await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(2))
+			us.add_levenshtein(0)
+			us.add_levenshtein(3)
+			return ConversationHandler.END
+
+#Loading levenshtein round data...
+def load_levenshtein(chat_data, level):
+	tale, word = pl.levenshtein_word(level)
+	chat_data["level"] = level
+	chat_data["tale"] = tale
+	chat_data["word"] = word
+	chat_data["attempts"] = 0
+	chat_data["words"].append(word)
 
 #Sending a palindromo for the user...
 async def send_palindromo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -470,11 +528,13 @@ def hide_id(id):
 def build_conversation_handler():
 	handler = ConversationHandler(
 		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("acertijo", start_acertijo),
-					CommandHandler("firewall", selecting_firewall), CommandHandler("error", trigger_error_submit)],
+					CommandHandler("firewall", selecting_firewall), CommandHandler("levenshtein", start_leveshtein),
+					CommandHandler("error", trigger_error_submit)],
 		states={LEVEL: [CallbackQueryHandler(conversation_button_click)],
 				TRYING:[MessageHandler(filters.TEXT & ~filters.COMMAND, check_try),
 					CallbackQueryHandler(conversation_button_click)],
 				FIREWALL: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_firewall)],
+				LEVENSHTEIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_levenshtein)],
 				ERROR_1: [MessageHandler(filters.TEXT, report_command)],
 				ERROR_2: [MessageHandler(filters.TEXT & ~filters.COMMAND, report_error)]},
 				fallbacks=[MessageHandler(filters.COMMAND, cancel_challenge)],

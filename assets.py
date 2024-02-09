@@ -89,3 +89,10 @@ class Assets():
 		result.append(loose)
 		result.append(cheat)
 		return result
+
+	#Printing Assets()...
+	def __str__(self):
+		return "- Festival del ingenio Bot\n" + \
+				"  I am the class in charge of managing assets...\n" + \
+				"  gitlab.com/rodrigovalla/festivaldelingeniobot\n" + \
+				"  rodrigovalla@protonmail.ch"

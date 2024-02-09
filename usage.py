@@ -15,6 +15,7 @@ class Usage():
 		self.rebus = [0,0,0,0,0] #count, victory, loose, solution, cancelled
 		self.acertijo = [0,0,0,0,0] #count, victory, loose, solution, cancelled
 		self.firewall = [0,0,0,0,0] #count, victory, loose, cheated, cancelled
+		self.levenshtein = [0,0,0,0,0] #count, level_victory, victory, loose, cancelled
 		self.jugarmenor = 0
 		self.jugarpromedio = 0
 		self.palindromo = 0
@@ -33,6 +34,7 @@ class Usage():
 			"rebus: " + str(self.rebus) + "\n" + \
 			"acertijo: " + str(self.acertijo) + "\n" + \
 			"firewall: " + str(self.firewall) + "\n" + \
+			"levenshtein: " + str(self.levenshtein) + "\n" + \
 			"jugarmenor: " + str(self.jugarmenor) + "\n" + \
 			"jugarpromedio: " + str(self.jugarpromedio) + "\n" + \
 			"palindromo: " + str(self.palindromo) + "\n" + \
@@ -65,6 +67,7 @@ class Usage():
 		line += str(self.rebus) + ";"
 		line += str(self.acertijo) + ";"
 		line += str(self.firewall) + ";"
+		line += str(self.levenshtein) + ";"
 		line += str(self.jugarmenor) + ";"
 		line += str(self.jugarpromedio) + ";"
 		line += str(self.palindromo) + ";"
@@ -92,6 +95,13 @@ class Usage():
 		elif command == "firewall":
 			self.firewall[0] += 1
 			self.firewall[end] += 1
+		elif command == "levenshtein":
+			self.levenshtein[0] += 1
+			self.levenshtein[end] += 1
+
+	#Registering a Levenshtein change:
+	def add_levenshtein(self, key):
+		self.levenshtein[key] += 1
 
 	#Registering a new minor game move...
 	def add_jugarmenor(self):
@@ -146,3 +156,10 @@ class Usage():
 		file.write(description)
 		file.write(user + "\n")
 		file.close()
+
+	#Printing Usage()...
+	def __str__(self):
+		return "- Festival del ingenio Bot\n" + \
+				"  I am the class in charge of working with usage data...\n" + \
+				"  gitlab.com/rodrigovalla/festivaldelingeniobot\n" + \
+				"  rodrigovalla@protonmail.ch"
