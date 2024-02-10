@@ -29,7 +29,7 @@ acertijo_keys = ["command", "type","words","solution_type","statement","solution
 firewall_keys = ["command", "type"]
 attempts_limit = 2 #Defining the number of attempts before ending a challenge...
 firewall_limits = [5, 13] #Defining victory-loose limits for firewall game...
-levenshtein_base_limit = 10 #Base number of attempts for a Levenshtein challenge...
+levenshtein_base_limit = 5 #Base number of attempts for a Levenshtein challenge...
 vowelsa, vowelsb = "áéíóúü", "aeiouu" #Mapping special characters to check sent solutions...
 translation = str.maketrans(vowelsa, vowelsb)
 
@@ -226,6 +226,7 @@ async def firewall_cheat_detected(update: Update, context: ContextTypes.DEFAULT_
 	logging.info(hide_id(id) + " ended a firewall game: CHEAT")
 	await context.bot.send_message(chat_id=id, text=msg.get_message("firewall_cheat"), parse_mode=ParseMode.HTML)
 	await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(3))
+	context.chat_data.clear()
 
 #Loading firewall round data...
 def load_firewall(chat_data, difficulty):
@@ -262,11 +263,14 @@ async def check_levenshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 	distance = pl.distance(move, context.chat_data["word"])
 	if distance == 0:
 		if context.chat_data["level"] > 13:
-			await context.bot.send_message(chat_id=id, text=msg.get_message("levenshtein_final_victory"), parse_mode=ParseMode.HTML)
 			await context.bot.send_message(chat_id=id, text=msg.levenshtein_played_words(context.chat_data["words"]), parse_mode=ParseMode.HTML)
+			await context.bot.send_message(chat_id=id, text=msg.get_message("levenshtein_final_victory"), parse_mode=ParseMode.HTML)
 			await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(0))
 			us.add_levenshtein(0)
 			us.add_levenshtein(2)
+			name = build_user_name(update)
+			context.chat_data["attempts_history"][13] = context.chat_data["attempts"] 
+			pl.save_levenshtein(name, context.chat_data["level"], context.chat_data["words"], context.chat_data["attempts_history"])
 			return ConversationHandler.END
 		else:
 			await context.bot.send_message(chat_id=id, text=msg.get_message("levenshtein_level_victory"), parse_mode=ParseMode.HTML)
@@ -274,16 +278,21 @@ async def check_levenshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 			us.add_levenshtein(1)
 			return LEVENSHTEIN
 	else:
-		if context.chat_data["attempts"] < (levenshtein_base_limit + (context.chat_data["level"] - 1) * 2): 
+		if context.chat_data["attempts"] < context.chat_data["loose_time"]: 
 			m = msg.levenshtein_move_message(move, distance)
 			await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+			if context.chat_data["attempts"] == context.chat_data["hint_time"]:
+				m = msg.levenshtein_hint_message(pl.levenshtein_hint(context.chat_data["word"]))
+				await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
 			return LEVENSHTEIN
 		else:
-			await context.bot.send_message(chat_id=id, text=msg.get_message("levenshtein_final_loose"), parse_mode=ParseMode.HTML)
 			await context.bot.send_message(chat_id=id, text=msg.levenshtein_played_words(context.chat_data["words"]), parse_mode=ParseMode.HTML)
+			await context.bot.send_message(chat_id=id, text=msg.get_message("levenshtein_final_loose"), parse_mode=ParseMode.HTML)
 			await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(2))
 			us.add_levenshtein(0)
 			us.add_levenshtein(3)
+			name = build_user_name(update)
+			pl.save_levenshtein(name, context.chat_data["level"], context.chat_data["words"], context.chat_data["attempts_history"])
 			return ConversationHandler.END
 
 #Loading levenshtein round data...
@@ -292,8 +301,14 @@ def load_levenshtein(chat_data, level):
 	chat_data["level"] = level
 	chat_data["tale"] = tale
 	chat_data["word"] = word
-	chat_data["attempts"] = 0
+	chat_data["loose_time"] = levenshtein_base_limit + (level- 1) * 2
+	chat_data["hint_time"] = chat_data["loose_time"] // 2 + 1
 	chat_data["words"].append(word)
+	if level == 1:
+		chat_data["attempts_history"] = [0 for i in range(14)]
+	else: 
+		chat_data["attempts_history"][level-2] = chat_data["attempts"]
+	chat_data["attempts"] = 0
 
 #Sending a palindromo for the user...
 async def send_palindromo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -417,10 +432,10 @@ async def print_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 	if len(m) == 2:
 		type = m[1].lower().translate(translation)
 		us.add_help(type)
-		await context.bot.send_message(chat_id=id, text=msg.build_custom_help_message(type), parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=id, text=msg.build_custom_help_message(type), disable_web_page_preview=True, parse_mode=ParseMode.HTML)
 	else:
 		us.add_help(None)
-		await context.bot.send_message(chat_id=id, text=msg.build_help_message(), parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=id, text=msg.build_help_message(), disable_web_page_preview=True, parse_mode=ParseMode.HTML)
 
 #Triggering /info command...
 async def print_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -552,7 +567,7 @@ def main():
 		logging.basicConfig(level=logging.INFO, format="%(asctime)s;%(name)s;%(levelname)s;%(message)s")
 	print("Ready to build the bot...", end="\n")
 	app = Application.builder().token(config["token"]).build()
-	app.add_error_handler(error_notification)
+	#app.add_error_handler(error_notification)
 	app.add_handler(CommandHandler("start", start), group=2)
 	app.add_handler(CommandHandler("palindromo", send_palindromo), group=2)
 	app.add_handler(CommandHandler("reversible", send_reverse_number), group=2)

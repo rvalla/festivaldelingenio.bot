@@ -2,6 +2,10 @@
 
 # Festival del Ingenio Bot: changelog
 
+## 2024-02-09: v0.9
+
+New **/levenshtein** command to play **Levenshtein challenges**. Improvements in in **/help**.
+
 ## 2024-02-06: v0.8.1
 
 New **/error** command to allow users to report errors directly.  

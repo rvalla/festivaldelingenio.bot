@@ -1,7 +1,7 @@
 {
 	"bot_name": "Festival del Ingenio Bot",
 	"hello": "Hola, soy el bot del <b>Festival del Ingenio</b>.\n¡Espero que te diviertas!",
-	"hello2": "Si necesitás ayuda podés mandarme /help. También podés mandarme /info si no sabés bien quién soy.",
+	"hello2": "Si necesitás ayuda podés mandarme /help. También podés mandarme /info si no sabés bien quién soy. Por favor usá el comando /error si me encontrás una falla.",
 	"palindromo": "Elegí el siguiente palíndromo para vos:",
 	"reverse_number": "Acá te mando un número escrito de forma reversible:",
 	"reverse_error": "No tengo solución para ese número",

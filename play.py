@@ -237,6 +237,20 @@ class Play():
         tale = tale_data[0]
         word = rd.choice(tale_data[1][level-1][:len(tale_data[1][level-1])-2].split(","))
         return tale, word
+    
+    def levenshtein_hint(self, word):
+        size = len(word)
+        candidates = rd.sample(range(size), size // 2)
+        showed = [False for i in range(size)]
+        for c in candidates:
+            showed[c] = True
+        hint = ""
+        for i in range(size):
+            if showed[i]:
+                hint += word[i]
+            else:
+                hint += "*"
+        return hint
 
     #Measuring Levenshtein distance dinamically...
     #https://en.wikipedia.org/wiki/Levenshtein_distance#Iterative_with_full_matrix
@@ -287,6 +301,19 @@ class Play():
         l.append(("Funes el memorioso", open("assets/text/words_borges_funes.txt").readlines()))
         l.append(("El jardín de los senderos que se bifurcan", open("assets/text/words_borges_jardin.txt").readlines()))
         return l
+    
+    #Saving Levenshtein game result...
+    def save_levenshtein(self, name, level, words, attempts):
+        file = open(self.output_path, "a")
+        t = dt.datetime.now()
+        line = str(t.year) + "-" + str(t.month) + "-" + str(t.day) + ";"
+        line += "Levenshtein challenge;"
+        line += name + ";"
+        line += str(level) + ";"
+        line += str(words) + ";"
+        line += str(attempts[:level-1]) + "\n"
+        file.write(line)
+        file.close()
     
     #Printing Play()...
     def __str__(self):
