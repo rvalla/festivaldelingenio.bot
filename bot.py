@@ -23,7 +23,7 @@ us = Usage("usage.csv", "errors.csv") #The class to store usage data...
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
 pl = Play("games.csv") #The class to let the users play some game...
-LEVEL, TRYING, FIREWALL, LEVENSHTEIN, ERROR_1, ERROR_2 = range(6) #Conversation states...
+FIREWALL_L, TRYING, FIREWALL, LEVENSHTEIN, ERROR_1, ERROR_2 = range(6) #Conversation states...
 rebus_keys = ["command", "type","animated","words","solution","explanation","hint","file_id","path"] #Keys to load rebus data...
 acertijo_keys = ["command", "type","words","solution_type","statement","solution","explanation","hint"] #Keys to load acertijo data...
 firewall_keys = ["command", "type"]
@@ -162,12 +162,12 @@ async def cancel_challenge(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 #Selecting firewall difficulty and starting challenge...
 async def selecting_firewall(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 	id = update.effective_chat.id
-	keyboard = [[InlineKeyboardButton(text="Fácil", callback_data="f_0"),
-				InlineKeyboardButton(text="Difícil", callback_data="f_1"),
-				InlineKeyboardButton(text="Durísimo", callback_data="f_2")]]
+	keyboard = [[InlineKeyboardButton(text="Fácil", callback_data="firewall_0"),
+				InlineKeyboardButton(text="Difícil", callback_data="firewall_1"),
+				InlineKeyboardButton(text="Durísimo", callback_data="firewall_2")]]
 	reply = InlineKeyboardMarkup(keyboard)
 	await context.bot.send_message(chat_id=id, text=msg.get_message("present_firewall"), reply_markup=reply, parse_mode=ParseMode.HTML)
-	return LEVEL
+	return FIREWALL_L
 
 #Starting a firewall game round...
 async def start_firewall(update: Update, context: ContextTypes.DEFAULT_TYPE, difficulty: int) -> None:
@@ -251,9 +251,15 @@ async def start_leveshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 #Starting a Levenshtein level...
 async def start_levenshtein_level(id: int, context: ContextTypes.DEFAULT_TYPE, level: int) -> None:
 	load_levenshtein(context.chat_data, level)
-	m1, m2 = msg.new_leveshtein_level_message(context.chat_data["tale"], level)
+	m1, m2 = msg.new_leveshtein_level_message(context.chat_data["tale"], context.chat_data["author"], level)
+	if context.chat_data["level"] > 2:
+		keyboard = [[InlineKeyboardButton(text="Pista", callback_data="levenshtein_0"),
+					InlineKeyboardButton(text="Súper Pista", callback_data="levenshtein_1")]]
+	else:
+		keyboard = [[InlineKeyboardButton(text="Pista", callback_data="levenshtein_0")]]
+	reply = InlineKeyboardMarkup(keyboard)
 	await context.bot.send_message(chat_id=id, text=m1, parse_mode=ParseMode.HTML)
-	await context.bot.send_message(chat_id=id, text=m2, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=id, text=m2, reply_markup=reply, parse_mode=ParseMode.HTML)
 
 #Checking a levenshtein move...
 async def check_levenshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -262,7 +268,7 @@ async def check_levenshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 	context.chat_data["attempts"] += 1
 	distance = pl.distance(move, context.chat_data["word"])
 	if distance == 0:
-		if context.chat_data["level"] > 13:
+		if context.chat_data["level"] > 9:
 			await context.bot.send_message(chat_id=id, text=msg.levenshtein_played_words(context.chat_data["words"]), parse_mode=ParseMode.HTML)
 			await context.bot.send_message(chat_id=id, text=msg.get_message("levenshtein_final_victory"), parse_mode=ParseMode.HTML)
 			await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(0))
@@ -279,11 +285,8 @@ async def check_levenshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 			return LEVENSHTEIN
 	else:
 		if context.chat_data["attempts"] < context.chat_data["loose_time"]: 
-			m = msg.levenshtein_move_message(move, distance)
+			m = msg.levenshtein_move_message(move, distance, context.chat_data["loose_time"] - context.chat_data["attempts"])
 			await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
-			if context.chat_data["attempts"] == context.chat_data["hint_time"]:
-				m = msg.levenshtein_hint_message(pl.levenshtein_hint(context.chat_data["word"]))
-				await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
 			return LEVENSHTEIN
 		else:
 			await context.bot.send_message(chat_id=id, text=msg.levenshtein_played_words(context.chat_data["words"]), parse_mode=ParseMode.HTML)
@@ -295,14 +298,35 @@ async def check_levenshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 			pl.save_levenshtein(name, context.chat_data["level"], context.chat_data["words"], context.chat_data["attempts_history"])
 			return ConversationHandler.END
 
+#Sending a levenshtein hint...
+async def levenshtein_hint(update: Update, context: ContextTypes.DEFAULT_TYPE, hint_type: int) -> int:
+	id = update.effective_chat.id
+	m = ""
+	if hint_type == 0:
+		if context.chat_data["letter"] % 2 == 0:
+			m = msg.levenshtein_hint_message(pl.levenshtein_letter(context.chat_data["word"]))
+		else:
+			m = msg.get_message("levenshtein_hint_refuse")
+		context.chat_data["letter"] += 1
+	elif hint_type == 1:
+		if context.chat_data["hint"] % 2 == 0:
+			m = msg.levenshtein_hint_message(pl.levenshtein_hint(context.chat_data["word"]))
+		else:
+			m = msg.get_message("levenshtein_hint_refuse")
+		context.chat_data["hint"] += 1
+	await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	return LEVENSHTEIN
+
 #Loading levenshtein round data...
 def load_levenshtein(chat_data, level):
-	tale, word = pl.levenshtein_word(level)
+	tale, author, word = pl.levenshtein_word(level)
 	chat_data["level"] = level
+	chat_data["author"] = author
 	chat_data["tale"] = tale
 	chat_data["word"] = word
 	chat_data["loose_time"] = levenshtein_base_limit + (level- 1) * 2
-	chat_data["hint_time"] = chat_data["loose_time"] // 2 + 1
+	chat_data["hint"] = 0
+	chat_data["letter"] = 0
 	chat_data["words"].append(word)
 	if level == 1:
 		chat_data["attempts_history"] = [0 for i in range(14)]
@@ -430,12 +454,17 @@ async def print_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 	id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) == 2:
-		type = m[1].lower().translate(translation)
-		us.add_help(type)
-		await context.bot.send_message(chat_id=id, text=msg.build_custom_help_message(type), disable_web_page_preview=True, parse_mode=ParseMode.HTML)
+		selection = m[1].lower().translate(translation)
+		us.add_help(selection)
+		await context.bot.send_message(chat_id=id, text=msg.build_custom_help_message(selection), disable_web_page_preview=True, parse_mode=ParseMode.HTML)
 	else:
 		us.add_help(None)
-		await context.bot.send_message(chat_id=id, text=msg.build_help_message(), disable_web_page_preview=True, parse_mode=ParseMode.HTML)
+		keyboard = [[InlineKeyboardButton(text="Firewall", callback_data="help_firewall"),
+					InlineKeyboardButton(text="Levenshtein", callback_data="help_levenshtein")],
+					[InlineKeyboardButton(text="Menor número", callback_data="help_menor"),
+					InlineKeyboardButton(text="Promedio", callback_data="help_promedio")]]
+		reply = InlineKeyboardMarkup(keyboard)
+		await context.bot.send_message(chat_id=id, text=msg.build_help_message(), reply_markup=reply, parse_mode=ParseMode.HTML)
 
 #Triggering /info command...
 async def print_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -479,6 +508,16 @@ async def wrong_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 		await context.bot.send_message(chat_id=id, text=msg.get_message("wrong"), parse_mode=ParseMode.HTML)
 
 #Deciding what function to trigger after a button click...
+async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+	id = update.effective_chat.id
+	query = update.callback_query
+	await query.answer()
+	if query.data.startswith("help"):
+		selection = query.data.split("_")[1]
+		us.add_help(selection)
+		await context.bot.send_message(chat_id=id, text=msg.build_custom_help_message(selection), disable_web_page_preview=True, parse_mode=ParseMode.HTML)
+
+#Deciding what function to trigger after a button click in a conversation...
 async def conversation_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 	query = update.callback_query
 	await query.answer()
@@ -488,10 +527,14 @@ async def conversation_button_click(update: Update, context: ContextTypes.DEFAUL
 	elif query.data == "solution":
 		await send_solution(update, context)
 		return ConversationHandler.END
-	elif query.data.startswith("f"):
+	elif query.data.startswith("firewall"):
 		d = int(query.data.split("_")[1])
 		await start_firewall(update, context, d)
 		return FIREWALL
+	elif query.data.startswith("levenshtein"):
+		d = int(query.data.split("_")[1])
+		await levenshtein_hint(update, context, d)
+		return LEVENSHTEIN
 
 #Sending a message to bot admin when an error occur...
 async def error_notification(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -545,11 +588,12 @@ def build_conversation_handler():
 		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("acertijo", start_acertijo),
 					CommandHandler("firewall", selecting_firewall), CommandHandler("levenshtein", start_leveshtein),
 					CommandHandler("error", trigger_error_submit)],
-		states={LEVEL: [CallbackQueryHandler(conversation_button_click)],
+		states={FIREWALL_L: [CallbackQueryHandler(conversation_button_click)],
 				TRYING:[MessageHandler(filters.TEXT & ~filters.COMMAND, check_try),
 					CallbackQueryHandler(conversation_button_click)],
 				FIREWALL: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_firewall)],
-				LEVENSHTEIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_levenshtein)],
+				LEVENSHTEIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_levenshtein),
+							CallbackQueryHandler(conversation_button_click)],
 				ERROR_1: [MessageHandler(filters.TEXT, report_command)],
 				ERROR_2: [MessageHandler(filters.TEXT & ~filters.COMMAND, report_error)]},
 				fallbacks=[MessageHandler(filters.COMMAND, cancel_challenge)],
@@ -567,7 +611,7 @@ def main():
 		logging.basicConfig(level=logging.INFO, format="%(asctime)s;%(name)s;%(levelname)s;%(message)s")
 	print("Ready to build the bot...", end="\n")
 	app = Application.builder().token(config["token"]).build()
-	#app.add_error_handler(error_notification)
+	app.add_error_handler(error_notification)
 	app.add_handler(CommandHandler("start", start), group=2)
 	app.add_handler(CommandHandler("palindromo", send_palindromo), group=2)
 	app.add_handler(CommandHandler("reversible", send_reverse_number), group=2)
@@ -579,6 +623,7 @@ def main():
 	app.add_handler(CommandHandler("help", print_help), group=2)
 	app.add_handler(CommandHandler("botusage", bot_usage), group=2)
 	app.add_handler(CommandHandler("saveusage", save_usage), group=2)
+	app.add_handler(CallbackQueryHandler(button_click), group=2)
 	app.add_handler(build_conversation_handler(), group=1)
 	app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, wrong_message), group=1)
 	#app.add_handler(MessageHandler(filters.STICKER, print_sticker_id), group=1)

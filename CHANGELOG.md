@@ -2,6 +2,10 @@
 
 # Festival del Ingenio Bot: changelog
 
+## 2024-02-13: v0.9.1
+
+Improving **Levenshtein challenge** (now is the user who selects hints). Improving **/help**.  
+
 ## 2024-02-09: v0.9
 
 New **/levenshtein** command to play **Levenshtein challenges**. Improvements in in **/help**.
