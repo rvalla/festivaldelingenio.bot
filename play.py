@@ -234,10 +234,26 @@ class Play():
     
     def levenshtein_word(self, level):
         tale_data = rd.choice(self.levenshteins)
-        tale = tale_data[0]
-        word = rd.choice(tale_data[1][level-1][:len(tale_data[1][level-1])-2].split(","))
-        return tale, word
+        tale = tale_data[1]
+        author = tale_data[0]
+        size = rd.randint(level-1, level+3)
+        word = rd.choice(tale_data[2][size][:len(tale_data[2][size])-1].split(" "))
+        return tale, author, word
     
+    def levenshtein_letter(self, word):
+        size = len(word)
+        candidate = rd.randint(0, size-1)
+        showed = [False for i in range(size)]
+        hint = ""
+        if size > 1:
+            showed[candidate] = True
+        for i in range(size):
+            if showed[i]:
+                hint += word[i]
+            else:
+                hint += "*"
+        return hint
+
     def levenshtein_hint(self, word):
         size = len(word)
         candidates = rd.sample(range(size), size // 2)
@@ -296,10 +312,11 @@ class Play():
 
     #Loading words for Levenshtein challenges...
     def load_levenshteins(self):
+        file = open("assets/levenshtein.csv").readlines()[1:]
         l = []
-        l.append(("La biblioteca de Babel", open("assets/text/words_borges_biblioteca.txt").readlines()))
-        l.append(("Funes el memorioso", open("assets/text/words_borges_funes.txt").readlines()))
-        l.append(("El jardín de los senderos que se bifurcan", open("assets/text/words_borges_jardin.txt").readlines()))
+        for f in file:
+            data = f.split(";")
+            l.append((data[0], data[1], open(data[2]).readlines()))
         return l
     
     #Saving Levenshtein game result...

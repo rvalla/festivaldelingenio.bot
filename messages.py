@@ -87,20 +87,21 @@ class Messages():
         return m
     
     #Building level Levenshtein message...
-    def new_leveshtein_level_message(self, tale, level):
+    def new_leveshtein_level_message(self, tale, author, level):
         m1 = self.bold("Desafío de Levenshtein: NIVEL " + str(level))
-        m2 = "Seleccioné una palabra de " + str(level + 1) + " letras del cuento "
-        m2 += self.bold(tale) + " de " + self.bold("Jorge Luis Borges") + ". ¿Podés encontrarla?"
+        m2 = "Seleccioné una palabra del cuento "
+        m2 += self.bold(tale) + " de " + self.bold(author) + ". ¿Podés encontrarla?"
         return m1, m2
     
     #Building Levenshtein hint message...
     def levenshtein_hint_message(self, hint):
-        m = "Te merecés una pista: <b>" + hint + "</b>."
+        m = "Acá tenés una pista: <b>" + hint + "</b>."
         return m
     
     #Building Levenshtein move message...
-    def levenshtein_move_message(self, word, distance):
-        m = self.bold(word.capitalize()) + " está a distancia " + self.bold(str(distance)) + " de la balabra que buscás."
+    def levenshtein_move_message(self, word, distance, remaining_attempts):
+        m = self.bold(word.capitalize()) + " está a distancia " + self.bold(str(distance)) + " de la palabra que buscás.\n"
+        m += "Te quedan " + self.bold(str(remaining_attempts)) + " intentos."
         return m
 
     #Building Levenshtein words list...
@@ -198,7 +199,7 @@ class Messages():
             m = "No necesitás compañía para jugar al <b>firewall</b>. La idea es que existe, mientras dura el juego, " + \
                 "un <i>firewall</i> que deja pasar sólo algunos de los mensajes que me enviás. Tenés que descubrir " + \
                 "qué condición cumplen los mensajes que sí pasan. Si lográs pasar a través del <i>firewall</i> 5 mensajes " + \
-                "ganás una ronda. ¡Me olvidaba! Tenés 15 oportunidades.\n" + \
+                "ganás una ronda. ¡Me olvidaba! Tenés 15 oportunidades.\n\n" + \
                 "Mandame /firewall y empezá a jugar."
         elif type == "levenshtein":
             m = "La <b>distancia de Levenshtein</b> mide la distancia entre dos palabras buscando cómo se pueden transformar una " + \
@@ -209,7 +210,8 @@ class Messages():
                 "Así la distancia entre <b>resto</b> y <b>estado</b> es 3 (resto > esto > estao > estado). Y la distancia entre " + \
                 "libro y liebre es 2 (libro > liebro > liebre). Ver más en <a href='https://es.wikipedia.org/wiki/Distancia_de_Levenshtein'>wikipedia</a>.\n\n" + \
                 "En el <b>Desafío de Levenshtein</b> yo elijo una palabra y te digo qué cantidad de letras tiene. Vos intentás adivinarla. " + \
-                "Tras cada intento lo único que te voy a decir es a qué <b>distancia</b> está tu palabra de la que yo elegí."
+                "Tras cada intento lo único que te voy a decir es a qué <b>distancia</b> está tu palabra de la que yo elegí.\n\n" + \
+                "Mandame /levenshtein y empezá a jugar."
         return m
 
     #Printing Messages()...

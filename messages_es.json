@@ -17,6 +17,7 @@
 	"levenshtein_level_victory": "¡La encontraste! Vamos con el siguiente nivel...",
 	"levenshtein_final_victory": "¡Espectacular! No me lo esperaba. Ya no tengo con qué desafiarte pero podés empezar de nuevo.",
 	"levenshtein_final_loose": "Ya no te quedan intentos. Si querés volver a intentarlo mandame /levenshtein.",
+	"levenshtein_hint_refuse": "¿Te parece? Va a ser muy fácil el juego pidiendo tantas pistas...",
 	"play_minor_number_move": "Registré la siguiente jugada:",
 	"play_double_move": "Ya tenés una jugada registrada en esta ronda.",
 	"play_minor_number_move_error": "¡Tenés que mandarme /jugarmenor seguido de un número natural!\nPor ejemplo: /jugarmenor 11",
