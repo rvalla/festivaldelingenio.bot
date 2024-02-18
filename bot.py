@@ -643,7 +643,7 @@ def main():
 		logging.basicConfig(level=logging.INFO, format="%(asctime)s;%(name)s;%(levelname)s;%(message)s")
 	print("Ready to build the bot...", end="\n")
 	app = Application.builder().token(config["token"]).build()
-	#app.add_error_handler(error_notification)
+	app.add_error_handler(error_notification)
 	app.add_handler(CommandHandler("start", start), group=2)
 	app.add_handler(CommandHandler("palindromo", send_palindromo), group=2)
 	app.add_handler(CommandHandler("reversible", send_reverse_number), group=2)
