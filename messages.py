@@ -62,17 +62,28 @@ class Messages():
     def build_start_firewall_message(self, ex_pass, ex_notpass):
         m = self.get_message("start_firewall")
         m += "El mensaje " + self.bold("| " + ex_pass + " | ") + " logra atravesar el " + self.italic("firewall") + \
-            ". En cambio, el mensaje " + self.bold("| " + ex_notpass + " | ") + "es bloqueado."
+            ".\nEn cambio, el mensaje " + self.bold("| " + ex_notpass + " | ") + "es bloqueado."
         return m
 
     #Building the message to answer a firewall move...
-    def answer_firewall_message(self, correct, message):
+    def answer_firewall_message(self, correct, message, success, attempts):
         m = ""
         if correct:
             m = self.bold("| " + message.capitalize() + " | ")
             m += rd.choice(self.get_message("correct_firewall_answer").split(";"))
         else:
             m = rd.choice(self.get_message("wrong_firewall_answer").split(";"))
+        m += "\n\nMensajes enviados: " + self.bold(str(success)) + "\nBloqueos restantes: " + self.bold(str(attempts))
+        return m
+    
+    #Building hint firewall message...
+    def hint_firewall_message(self, hint):
+        m = self.bold("Pista: ") + hint
+        return m
+    
+    #Building solution firewall message...
+    def solution_firewall_message(self, solution):
+        m = self.bold("Solución: ") + solution
         return m
 
     #Building end firewall message...

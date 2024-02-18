@@ -2,6 +2,11 @@
 
 # Festival del Ingenio Bot: changelog
 
+## 2024-02-18: v0.9.2
+
+Improving **Levenshtein challenges** (number of attempts and level's word size ranges were changed).  
+Improving **Firewall game** (now the user can ask for a hint or the firewall rule).  
+
 ## 2024-02-13: v0.9.1
 
 Improving **Levenshtein challenge** (now is the user who selects hints). Improving **/help**.  

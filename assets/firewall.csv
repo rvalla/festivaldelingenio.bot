@@ -1,28 +1,30 @@
-command;type;algorithm;pass;notpass;input_type;parameters_type;parameters;difficulty
-firewall;words;2;cuaderno;libreta;word;numbers;8;0
-firewall;words;2;árbol;león;word;numbers;5;0
-firewall;words;3;camión;automóvil;word;letters;0,c,-1,n;1
-firewall;numbers;0;134;99;number;numbers;100,200;0
-firewall;numbers;0;1457;1568;number;numbers;500,1500;0
-firewall;numbers;1;36;23;number;numbers;3,0;1
-firewall;numbers;1;64;49;number;numbers;7,1;2
-firewall;words;3;145;245;word;letters;0,1,-1,5;0
-firewall;words;3;1321;2145;word;letters;0,1,-1,1;0
-firewall;words;3;32426;1324;word;letters;0,3,-1,6;0
-firewall;words;4;mi sombra;la de otro;word;letters;2, ;1
-firewall;words;4;una flor amarilla;una flor y una hoja;word;letters;3, ;1
-firewall;words;4;semana;mes;word;letters;3,a;1
-firewall;words;4;3464;1234;word;letters;3,4;1
-firewall;words;3;caracol;camastro;word;letters;0,c,2,r;2
-firewall;numbers;0;31;30;number;numbers;30,45;0
-firewall;words;3;14256;8345;word;letters;0,1,2,2,4,6;2
-firewall;words;3;furioso;enojado;word;letters;1,u,3,i;2
-firewall;words;3;caminar;vestir;word;letters;-1,r,-2,a;0
-firewall;numbers;5;141;151;word;numbers;6;1
-firewall;numbers;5;99;88;word;numbers;18;1
-firewall;numbers;6;1234;567;word;numbers;-1,-2,7;2
-firewall;numbers;6;3024;2988;word;numbers;0,2,5;2
-firewall;words;4;cálculo;combinatoria;word;letters;2,a;1
-firewall;words;4;dos palabras;tres palabras;word;letters;1,e;1
-firewall;words;4;rastrillo;urna;word;letters;1,u;1
-firewall;numbers;0;1002;1022;number;numbers;920,1020;0
+command;type;algorithm;pass;notpass;input_type;parameters_type;parameters;hint;solution;difficulty
+firewall;words;2;cuaderno;libreta;word;numbers;8;Hay palabras más largas que otras...;Pasaban únicamente mensajes de 8 letras.;0
+firewall;words;2;árbol;león;word;numbers;5;Hay palabras más largas que otras...;Pasaban únicamente mensajes de 5 letras.;0
+firewall;words;3;camión;automóvil;word;letters;0,c,-1,n;El principio y el final es lo que importa.;Pasaban únicamente los mensajes que comenzaban con <b>c</b> y terminaban con <b>n</b>.;1
+firewall;numbers;0;134;99;number;numbers;100,200;Necesitás mantenerte dentro del rango.;Pasaban los números que estaban entre 100 y 200.;0
+firewall;numbers;0;1457;1568;number;numbers;500,1500;Necesitás mantenerte dentro del rango.;Pasaban los números que estaban entre 500 y 1500.;0
+firewall;numbers;1;36;23;number;numbers;3,0;Todo tiene que ver con el resto.;Pasaban los números divisibles por 3.;1
+firewall;numbers;1;64;49;number;numbers;7,1;Todo tiene que ver con el resto.;Pasaban los números que al dividirlos por 7 tienen resto 1.;2
+firewall;words;3;145;245;word;letters;0,1,-1,5;El principio y el final es lo que importa.;Pasaban únicamente los mensajes que comenzaban con <b>1</b> y terminaban con <b>5</b>.;0
+firewall;words;3;1321;2145;word;letters;0,1,-1,1;El principio y el final es lo que importa.;Pasaban únicamente los mensajes que comenzaban con <b>1</b> y terminaban con <b>1</b>.;0
+firewall;words;3;32426;1324;word;letters;0,3,-1,6;El principio y el final es lo que importa.;Pasaban únicamente los mensajes que comenzaban con <b>3</b> y terminaban con <b>6</b>.;0
+firewall;words;4;mi sombra;la de otro;word;letters;2, ;La extensión del mensaje a veces no se mide contando las letras.;Pasaban únicamente los mensajes que tenían dos palabras.;1
+firewall;words;4;una flor amarilla;una flor y una hoja;word;letters;3, ;La extensión del mensaje a veces no se mide contando las letras.;Pasaban únicamente los mensajes que tenían tres palabras.;1
+firewall;words;4;semana;mes;word;letters;3,a;¡Hay letras que sí importan!;Pasaban únicamente los mensajes que tenían dos <b>a</b>.;1
+firewall;words;4;3464;1234;word;letters;3,4;¡Hay cifras que sí importan! <b>5443</b> también pasa.;Pasaban únicamente los mensajes que tenían dos <b>4</b>.;1
+firewall;words;3;caracol;camastro;word;letters;0,c,2,r;Hay letras que no están en cualquier lugar (<b>cartel</b> también pasa).;Pasaban únicamente los mensajes que comenzaban con <b>c</b> y tenían como tercera letra una <b>r</b>.;2
+firewall;numbers;0;31;30;number;numbers;30,45;Necesitás mantenerte dentro del rango.;Pasaban los números que estaban entre 30 y 45.;0
+firewall;words;3;14256;8345;word;letters;0,1,2,2,4,6;Hay cifras que no están en cualquier lugar (<b>1327628</b> también pasa).;Pasaban únicamente los mensajes que comenzaban con <b>1</b>, tenían como tercera cifra un <b>2</b> y tenían como quinta cifra un <b>6</b>.;2
+firewall;words;3;furioso;enojado;word;letters;1,u,3,i;Hay letras que no están en cualquier lugar (<b>rutina</b> también pasa).;Pasaban únicamente los mensajes que como segunda letra tenían una <b>u</b> y como cuarta letra una <b>i</b>.;2
+firewall;words;3;caminar;vestir;word;letters;-1,r,-2,a;En definitiva sólo existen 3 terminaciones posibles.;Pasaban únicamente los mensajes que terminaban con <b>ar</b>.;0
+firewall;numbers;5;141;151;word;numbers;6;La suma es una operación matemática elemental.;Pasaban únicamente los números cuyas cifras sumaban 6.;1
+firewall;numbers;5;99;88;word;numbers;18;La suma es una operación matemática elemental.;Pasaban únicamente los números cuyas cifras sumaban 18.;1
+firewall;numbers;6;1234;567;word;numbers;-1,-2,7;Adentro de un número puede haber otro. Sumando cifras puede haber más. El <b>152</b> también pasa.;Pasaban únicamente los números cuyas últimas 2 cifras sumaban 7.;2
+firewall;numbers;6;3024;2988;word;numbers;0,2,5;Adentro de un número puede haber otro. Sumando cifras puede haber más. El <b>152</b> también pasa.;Pasaban únicamente los números cuyas 3 primeras cifras sumaban 5.;2
+firewall;words;4;cálculo;combinatoria;word;letters;2,a;¡Hay letras que sí importan! <b>Terma</b> también pasa.;Pasaban únicamente los mensajes que tenían una <b>a</b>.;1
+firewall;words;4;dos palabras;tres palabras;word;letters;1,e;¡Hay letras que sí importan! <b>Cargo</b> también pasa.;Pasaban únicamente los mensajes que no tenían <b>e</b>.;1
+firewall;words;4;rastrillo;urna;word;letters;1,u;¡Hay letras que sí importan! <b>Sueño</b> tampoco pasa.;Pasaban únicamente los mensajes que no tenían <b>u</b>.;1
+firewall;numbers;0;1002;1022;number;numbers;920,1020;Necesitás mantenerte dentro del rango.;Pasaban los números que estaban entre 1002 y 1022.;0
+firewall;numbers;2;12342;6734;word;numbers;5;Hay números más grandes que otros...;Pasaban únicamente los números de 5 cifras.;0
+firewall;numbers;2;423;1198;word;numbers;5;Hay números más chicos que otros...;Pasaban únicamente los números de 3 cifras.;0

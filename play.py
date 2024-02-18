@@ -194,6 +194,8 @@ class Play():
         round["ex_notpass"] = data[4]
         round["in_type"] = data[5]
         round["parameters"] = self.firewall_parameters(data[6], data[7])
+        round["hint"] = data[8]
+        round["solution"] = data[9]
         return round
 
     #Building a firewalls challenge parameters list...
@@ -220,11 +222,11 @@ class Play():
         file = open("assets/firewall.csv").readlines()[1:]
         for l in file:
             data = l.split(";")
-            if int(data[8]) == 0:
+            if int(data[10]) == 0:
                 easy.append(l)
-            elif int(data[8]) == 1:
+            elif int(data[10]) == 1:
                 medium.append(l)
-            elif int(data[8]) == 2:
+            elif int(data[10]) == 2:
                 hard.append(l)
         availables = [len(easy), len(medium), len(hard)]
         firewalls.append(easy)
@@ -236,9 +238,24 @@ class Play():
         tale_data = rd.choice(self.levenshteins)
         tale = tale_data[1]
         author = tale_data[0]
-        size = rd.randint(level-1, level+3)
+        level_size_range = self.levenshtein_word_size_range(level)
+        size = rd.randint(level_size_range[0], level_size_range[1])
         word = rd.choice(tale_data[2][size][:len(tale_data[2][size])-1].split(" "))
+        print(level_size_range)
+        print(word)
         return tale, author, word
+    
+    def levenshtein_word_size_range(self, level):
+        level_range = None
+        if level < 3:
+            level_range = [level - 1, level]
+        elif level < 6:
+            level_range = [level - 1, level + 1]
+        elif level < 9:
+            level_range = [level - 2, level + 2]
+        else:
+            level_range = [level - 2, level + 4]
+        return level_range
     
     def levenshtein_letter(self, word):
         size = len(word)
