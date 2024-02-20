@@ -220,7 +220,7 @@ class Messages():
                 "El <i>cambio</i> consiste en <i>cambiar</i> una letra por otra (<b>r</b>uta > <b>m</b>uta).\n" + \
                 "Así la distancia entre <b>resto</b> y <b>estado</b> es 3 (resto > esto > estao > estado). Y la distancia entre " + \
                 "libro y liebre es 2 (libro > liebro > liebre). Ver más en <a href='https://es.wikipedia.org/wiki/Distancia_de_Levenshtein'>wikipedia</a>.\n\n" + \
-                "En el <b>Desafío de Levenshtein</b> yo elijo una palabra y te digo qué cantidad de letras tiene. Vos intentás adivinarla. " + \
+                "En el <b>Desafío de Levenshtein</b> yo elijo una palabra y vos intentás adivinarla. " + \
                 "Tras cada intento lo único que te voy a decir es a qué <b>distancia</b> está tu palabra de la que yo elegí.\n\n" + \
                 "Mandame /levenshtein y empezá a jugar."
         return m

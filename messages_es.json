@@ -13,7 +13,7 @@
 	"firewall_victory": "¡Lo lograste! Le ganaste al <b>firewall</b>.",
 	"firewall_defeat": "No conseguiste superar la prueba.",
 	"firewall_cheat": "Buen intento. Parece que acá sólo yo tengo códigos. Doy por terminado el desafío.",
-	"start_levenshtein": "Empezamos a jugar una partida del <b>Desafío de Levenshtein</b>. Voy a elegir palabras de un cuento de Borges y vas tener que encontrarlas.",
+	"start_levenshtein": "Empezamos a jugar una partida del <b>Desafío de Levenshtein</b>. Voy a elegir palabras de algunos cuentos y vas tener que encontrarlas.",
 	"levenshtein_level_victory": "¡La encontraste! Vamos con el siguiente nivel...",
 	"levenshtein_final_victory": "¡Espectacular! No me lo esperaba. Ya no tengo con qué desafiarte pero podés empezar de nuevo.",
 	"levenshtein_final_loose": "Ya no te quedan intentos. Si querés volver a intentarlo mandame /levenshtein.",

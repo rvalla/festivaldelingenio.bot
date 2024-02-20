@@ -241,8 +241,6 @@ class Play():
         level_size_range = self.levenshtein_word_size_range(level)
         size = rd.randint(level_size_range[0], level_size_range[1])
         word = rd.choice(tale_data[2][size][:len(tale_data[2][size])-1].split(" "))
-        print(level_size_range)
-        print(word)
         return tale, author, word
     
     def levenshtein_word_size_range(self, level):

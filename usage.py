@@ -21,7 +21,7 @@ class Usage():
 		self.palindromo = 0
 		self.reversible = 0
 		self.video = 0
-		self.help = [0,0,0,0] #help, minor, average, firewall
+		self.help = [0,0,0,0,0] #help, minor, average, firewall, levenshtein
 		self.info = 0
 		self.wrong_message = 0
 		self.error_reports = 0
@@ -131,6 +131,8 @@ class Usage():
 			self.help[2] += 1
 		elif type == "firewall":
 			self.help[3] += 1
+		elif type == "levenshtein":
+			self.help[4] += 1
 		else:
 			self.help[0] += 1
 

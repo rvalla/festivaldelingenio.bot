@@ -73,3 +73,6 @@ date;game;moves;numbers;winner;winner_n;numberlist
 2024-2-13;Levenshtein challenge;Rodrigo Valla;1;['baja'];[]
 2024-2-13;Levenshtein challenge;Rodrigo Valla;4;['y', 'un', 'fang', 'plegaria'];[3, 2, 3]
 2024-2-14;Levenshtein challenge;Abi;1;['fang'];[]
+2024-2-19;Levenshtein challenge;λx.x;1;['y'];[]
+2024-2-19;Levenshtein challenge;Rodrigo Valla;5;['a', 'son', 'viese', 'esos', 'uruguay'];[6, 3, 12, 11]
+2024-2-19;Levenshtein challenge;Abi;1;['y'];[]

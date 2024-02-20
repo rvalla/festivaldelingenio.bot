@@ -27,4 +27,4 @@ firewall;words;4;dos palabras;tres palabras;word;letters;1,e;¡Hay letras que s�
 firewall;words;4;rastrillo;urna;word;letters;1,u;¡Hay letras que sí importan! <b>Sueño</b> tampoco pasa.;Pasaban únicamente los mensajes que no tenían <b>u</b>.;1
 firewall;numbers;0;1002;1022;number;numbers;920,1020;Necesitás mantenerte dentro del rango.;Pasaban los números que estaban entre 1002 y 1022.;0
 firewall;numbers;2;12342;6734;word;numbers;5;Hay números más grandes que otros...;Pasaban únicamente los números de 5 cifras.;0
-firewall;numbers;2;423;1198;word;numbers;5;Hay números más chicos que otros...;Pasaban únicamente los números de 3 cifras.;0
+firewall;numbers;2;423;1198;word;numbers;3;Hay números más chicos que otros...;Pasaban únicamente los números de 3 cifras.;0
