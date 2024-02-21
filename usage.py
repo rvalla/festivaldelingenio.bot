@@ -24,7 +24,7 @@ class Usage():
 		self.help = [0,0,0,0,0] #help, minor, average, firewall, levenshtein
 		self.info = 0
 		self.wrong_message = 0
-		self.error_reports = 0
+		self.error_reports = [0, 0] #success, cancelled
 		self.errors = 0
 
 	#Building usage information message...
@@ -98,6 +98,8 @@ class Usage():
 		elif command == "levenshtein":
 			self.levenshtein[0] += 1
 			self.levenshtein[end] += 1
+		elif command == "error":
+			self.error_reports[1] += 1
 
 	#Registering a Levenshtein change:
 	def add_levenshtein(self, key):
@@ -146,7 +148,7 @@ class Usage():
 	
 	#Registering a new error report...
 	def add_error_report(self):
-		self.error_reports += 1
+		self.error_reports[0] += 1
 	
 	#Saving en error report...
 	def save_error_report(self, command, description, user):

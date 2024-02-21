@@ -5,7 +5,7 @@ class Messages():
     "The class the bot use to know what to say..."
 
     def __init__(self):
-        self.msg = js.load(open("messages_es.json"))
+        self.msg = js.load(open("assets/text/messages_es.json"))
 
     #Returning a message from self.msg dictionary...
     def get_message(self, key):

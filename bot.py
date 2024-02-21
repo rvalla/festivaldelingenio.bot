@@ -162,6 +162,7 @@ async def cancel_challenge(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 #Selecting firewall difficulty and starting challenge...
 async def selecting_firewall(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 	id = update.effective_chat.id
+	context.chat_data["command"] = "firewall"
 	keyboard = [[InlineKeyboardButton(text="Fácil", callback_data="firewall_0"),
 				InlineKeyboardButton(text="Difícil", callback_data="firewall_1"),
 				InlineKeyboardButton(text="Durísimo", callback_data="firewall_2")]]
@@ -499,6 +500,7 @@ async def print_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 async def trigger_error_submit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 	id = update.effective_chat.id
 	logging.info(str(hide_id(id)) + " wants to report an error...")
+	context.chat_data["command"] = "error"
 	await context.bot.send_message(chat_id=id, text=msg.get_message("submit_error_1"), parse_mode=ParseMode.HTML)
 	return ERROR_1
 
@@ -518,7 +520,7 @@ async def report_error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 	context.chat_data["error_description"] = m2
 	us.add_error_report()
 	us.save_error_report(m, m2, str(hide_id(id)))
-	admin_msg = "Error reported:\n-command: " + m + "\n-description: " + m2
+	admin_msg = "Error reported:\n-command: /" + m + "\n-description: " + m2
 	await context.bot.send_message(chat_id=config["admin_id"], text=admin_msg, parse_mode=ParseMode.HTML)
 	await context.bot.send_message(chat_id=id, text=msg.get_message("submit_error_3"), parse_mode=ParseMode.HTML)
 	return ConversationHandler.END
@@ -626,7 +628,7 @@ def build_conversation_handler():
 						CallbackQueryHandler(conversation_button_click)],
 				LEVENSHTEIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_levenshtein),
 							CallbackQueryHandler(conversation_button_click)],
-				ERROR_1: [MessageHandler(filters.TEXT, report_command)],
+				ERROR_1: [MessageHandler(filters.TEXT & ~filters.COMMAND, report_command)],
 				ERROR_2: [MessageHandler(filters.TEXT & ~filters.COMMAND, report_error)]},
 				fallbacks=[MessageHandler(filters.COMMAND, cancel_challenge)],
 				per_chat=True, per_user=False, per_message=False)
@@ -643,7 +645,7 @@ def main():
 		logging.basicConfig(level=logging.INFO, format="%(asctime)s;%(name)s;%(levelname)s;%(message)s")
 	print("Ready to build the bot...", end="\n")
 	app = Application.builder().token(config["token"]).build()
-	app.add_error_handler(error_notification)
+	#app.add_error_handler(error_notification)
 	app.add_handler(CommandHandler("start", start), group=2)
 	app.add_handler(CommandHandler("palindromo", send_palindromo), group=2)
 	app.add_handler(CommandHandler("reversible", send_reverse_number), group=2)
