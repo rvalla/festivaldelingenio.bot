@@ -204,8 +204,10 @@ class Messages():
                 "Juan manda el 5, Camila manda el 3, Martín manda el 6, Susana manda el 5 y Jorge manda el 3. " + \
                 "Gana Martín, porque el 6 es el menor número enviado una única vez.\n" + \
                 "Espero tu jugada. ¡Suerte!"
-        elif type == "promedio":
-            m = "Perdón pero aún no implementé este juego. En realidad es mi programador quien lo tiene que hacer."
+        elif type == "antipreguntas":
+            m = "Contestar bien una pregunta puede ser fácil, pero adivinar la respuesta incorrecta más frecuente no tanto. " + \
+                "El juego de las <b>Antipreguntas</b> es una propuesta de <b>Juli Garbulsky</b>. No podés jugar en cualquier momento, " + \
+                "necesitás sumarte a una partida mientrar alguien la controla. Si te invitaron a jugar mandá /antipreguntas."
         elif type == "firewall":
             m = "No necesitás compañía para jugar al <b>firewall</b>. La idea es que existe, mientras dura el juego, " + \
                 "un <i>firewall</i> que deja pasar sólo algunos de los mensajes que me enviás. Tenés que descubrir " + \

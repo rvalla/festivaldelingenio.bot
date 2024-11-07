@@ -23,6 +23,7 @@ class Usage():
 		self.video = 0
 		self.help = [0,0,0,0,0] #help, minor, average, firewall, levenshtein
 		self.info = 0
+		self.admin = [0,0,0,0] #sudo_admin, admin, minor admin, antipreguntas admin
 		self.wrong_message = 0
 		self.error_reports = [0, 0] #success, cancelled
 		self.errors = 0
@@ -42,6 +43,7 @@ class Usage():
 			"video: " + str(self.video) + "\n" + \
 			"help: " + str(self.help) + "\n" + \
 			"info: " + str(self.info) + "\n" + \
+			"admin: " + str(self.admin) + "\n" + \
 			"wrong_message: " + str(self.wrong_message) + "\n" \
 			"error reports: " + str(self.error_reports) + "\n" \
 			"errors: " + str(self.errors)
@@ -75,6 +77,7 @@ class Usage():
 		line += str(self.video) + ";"
 		line += str(self.help) + ";"
 		line += str(self.info) + ";"
+		line += str(self.admin) + ";"
 		line += str(self.wrong_message) + ";"
 		line += str(self.error_reports) + ";"
 		line += str(self.errors) + "\n"
@@ -141,6 +144,10 @@ class Usage():
 	#Registering a new info command...
 	def add_info(self):
 		self.info += 1
+
+	#Registering a new admin...
+	def add_admin(self, key):
+		self.admin[key] += 1
 
 	#Registering a messege out of context...
 	def add_wrong_message(self):

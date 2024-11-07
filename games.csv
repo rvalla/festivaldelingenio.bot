@@ -76,3 +76,5 @@ date;game;moves;numbers;winner;winner_n;numberlist
 2024-2-19;Levenshtein challenge;λx.x;1;['y'];[]
 2024-2-19;Levenshtein challenge;Rodrigo Valla;5;['a', 'son', 'viese', 'esos', 'uruguay'];[6, 3, 12, 11]
 2024-2-19;Levenshtein challenge;Abi;1;['y'];[]
+2024-11-7;minor unique number;1;1;Rodrigo Valla;4;{4};[4]
+2024-11-7;minor unique number;0;0;Nadie;número único;set();[]

@@ -33,5 +33,12 @@
 	"submit_error_2": "Contame brevemente de qué se trata el error que me encontraste. ¿Qué es lo que pasa?",
 	"submit_error_3": "Muchas gracias por tomarte un minuto para mejorarme. Esperemos que @rvalla me arregle pronto.",
 	"error": "Algo salió mal... ¡Qué vergüenza!",
-	"intruder": "No tenés autorización para ejecutar ese comando."
+	"admin": "Nueva sesión de administración iniciada. Acá están los botones con superpoderes:",
+	"admin_minor": "A partir de este momento controlás una partida del menor número único. Usá <i>Chequear</i> para consultar el estado del juego y <i>Terminar</i> para finalizar una ronda.",
+	"admin_minor_end": "Doy por terminada la sesión. Si necesitás volver a controlar el juego del menor número único mandá /admin.",
+	"admin_antip": "A partir de este momento controlás una partida de las antipreguntas. Usá <i>Siguiente</i> para habilitar la siguiente pregunta, <i>Chequear</i> para consultar el estado del juego y <i>Terminar</i> para dar por terminada una ronda.",
+	"admin_antip_end": "Doy por terminada la sesión. Si necesitás volver a controlar el juego de las antipreguntas mandá /admin.",
+	"admin_end": "Ha pasado el tiempo. Decidí dar por terminada tu sesión de administrador.",
+	"intruder": "No tenés autorización para ejecutar ese comando.",
+	"privacy": "Guardo únicamente los datos indispensables, como por ejemplo tu nombre y tus jugadas del <i>menor número único</i>. Olvido casi todo si me apagan, salvo ganadores y resultados de algunos juegos con fines estadísticos."
 }

@@ -5,6 +5,7 @@ from telegram.ext import (
 )
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
+from datetime import datetime as dt, timedelta
 import traceback, logging
 import json as js
 from usage import Usage
@@ -23,7 +24,7 @@ us = Usage("usage.csv", "errors.csv") #The class to store usage data...
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
 pl = Play("games.csv") #The class to let the users play some game...
-FIREWALL_L, TRYING, FIREWALL, LEVENSHTEIN, ANTIPREGUNTAS, ERROR_1, ERROR_2, ADMIN, ADMIN_MENOR, ADMIN_ANTIPREGUNTAS = range(10) #Conversation states...
+FIREWALL_L, TRYING, FIREWALL, LEVENSHTEIN, ANTIPREGUNTAS, ERROR_1, ERROR_2, ADMIN, ADMIN_MINOR, ADMIN_ANTIP = range(10) #Conversation states...
 rebus_keys = ["command", "type","animated","words","solution","explanation","hint","file_id","path"] #Keys to load rebus data...
 acertijo_keys = ["command", "type","words","solution_type","statement","solution","explanation","hint"] #Keys to load acertijo data...
 firewall_keys = ["command", "type"]
@@ -64,7 +65,7 @@ async def start_rebus(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 		return ConversationHandler.END #Ending challenge if image was not sent...
 
 #Sending images and animations...
-async def send_image(context: ContextTypes.DEFAULT_TYPE, animated: bool, id: int, file_id: int) -> None:
+async def send_image(context: ContextTypes.DEFAULT_TYPE, animated: bool, chat_id: int, file_id: int) -> None:
 	if animated == "True":
 		await context.bot.send_animation(chat_id=chat_id, animation=file_id)
 	else:
@@ -272,11 +273,11 @@ async def start_leveshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 	context.chat_data["command"] = "levenshtein"
 	context.chat_data["words"] = []
 	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("start_levenshtein"), parse_mode=ParseMode.HTML)
-	await start_levenshtein_level(id, context, 1)
+	await start_levenshtein_level(chat_id, context, 1)
 	return LEVENSHTEIN
 
 #Starting a Levenshtein level...
-async def start_levenshtein_level(id: int, context: ContextTypes.DEFAULT_TYPE, level: int) -> None:
+async def start_levenshtein_level(chat_id: int, context: ContextTypes.DEFAULT_TYPE, level: int) -> None:
 	load_levenshtein(context.chat_data, level)
 	m1, m2 = msg.new_leveshtein_level_message(context.chat_data["tale"], context.chat_data["author"], level)
 	keyboard = [[InlineKeyboardButton(text="Pista", callback_data="levenshtein_0"),
@@ -304,7 +305,7 @@ async def check_levenshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 			return ConversationHandler.END
 		else:
 			await context.bot.send_message(chat_id=chat_id, text=msg.get_message("levenshtein_level_victory"), parse_mode=ParseMode.HTML)
-			await start_levenshtein_level(id, context, context.chat_data["level"] + 1)
+			await start_levenshtein_level(chat_id, context, context.chat_data["level"] + 1)
 			us.add_levenshtein(1)
 			return LEVENSHTEIN
 	else:
@@ -403,61 +404,51 @@ async def save_minor_number(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 			if number > 0:
 				name = build_user_name(update)
 				us.add_jugarmenor()
-				if pl.save_minor_number(number, name, id): #Saving a move... Returns False if the player played before in the round...
+				if pl.save_minor_number(number, name, chat_id): #Saving a move... Returns False if the player played before in the round...
 					await context.bot.send_message(chat_id=chat_id, text=msg.build_minor_move_message(number, name), parse_mode=ParseMode.HTML)
 				else:
 					await context.bot.send_message(chat_id=chat_id, text=msg.get_message("play_double_move"), parse_mode=ParseMode.HTML)
 			else:
-				await failed_minor_number(context, id)
+				await failed_minor_number(context, chat_id)
 		except:
-			await failed_minor_number(context, id)
+			await failed_minor_number(context, chat_id)
 	else:
-		await failed_minor_number(context, id)
+		await failed_minor_number(context, chat_id)
 
 #Notifying the user of a wrong game move...
-async def failed_minor_number(context: ContextTypes.DEFAULT_TYPE, id: int) -> None:
+async def failed_minor_number(context: ContextTypes.DEFAULT_TYPE, chat_id: int) -> None:
 	logging.info(hide_id(chat_id) + " failed to play a minor number move...")
 	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("play_minor_number_move_error"), parse_mode=ParseMode.HTML)
 
 #Ending a game round...
 async def end_minor_number(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 	chat_id = update.effective_chat.id
-	m = update.message.text.split(" ")
-	if len(m) > 1 and m[1] == config["password"]:
-		winner_exist, number, winner, winner_id = pl.end_minor_game()
-		logging.info(hide_id(chat_id) + " ending a minor game round...")
-		end_m = pl.minor_info() + "\n\n" + \
-				msg.build_minor_game_message(winner_exist, number, winner)
-		await context.bot.send_message(chat_id=chat_id, text=end_m, parse_mode=ParseMode.HTML)
-		try:
-			if winner_exist:
-				await context.bot.send_message(chat_id=winner_id, text=msg.build_minor_victory_message(number), parse_mode=ParseMode.HTML)
-				await context.bot.send_sticker(chat_id=winner_id, sticker=ass.get_sticker_id(0))
-				logging.info("Game round victory notification sent")
-			loosers = pl.get_minor_loosers(winner_id)
-			looser_message = msg.build_minor_loose_message(winner_exist, winner, number)
-			logging.info("Notifying loosers of a minor game round")
-			for l in loosers:
-				await context.bot.send_message(chat_id=l, text=looser_message, parse_mode=ParseMode.HTML)
-				await context.bot.send_sticker(chat_id=l, sticker=ass.get_sticker_id(2))
-		except:
-			logging.info("Problems during game round notifications.")
-		pl.save_minor(winner, number)
-		pl.minor_reset()
-	else:
-		logging.info(hide_id(chat_id) + " wanted to end a game round without the password...")
-		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
+	winner_exist, number, winner, winner_id = pl.end_minor_game()
+	logging.info(hide_id(chat_id) + " ending a minor game round...")
+	end_m = pl.minor_info() + "\n\n" + \
+			msg.build_minor_game_message(winner_exist, number, winner)
+	await context.bot.send_message(chat_id=chat_id, text=end_m, parse_mode=ParseMode.HTML)
+	try:
+		if winner_exist:
+			await context.bot.send_message(chat_id=winner_id, text=msg.build_minor_victory_message(number), parse_mode=ParseMode.HTML)
+			await context.bot.send_sticker(chat_id=winner_id, sticker=ass.get_sticker_id(0))
+			logging.info("Game round victory notification sent")
+		loosers = pl.get_minor_loosers(winner_id)
+		looser_message = msg.build_minor_loose_message(winner_exist, winner, number)
+		logging.info("Notifying loosers of a minor game round")
+		for l in loosers:
+			await context.bot.send_message(chat_id=l, text=looser_message, parse_mode=ParseMode.HTML)
+			await context.bot.send_sticker(chat_id=l, sticker=ass.get_sticker_id(2))
+	except:
+		logging.info("Problems during game round notifications.")
+	pl.save_minor(winner, number)
+	pl.minor_reset()
 
 #Sending game current state...
 async def minor_number_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 	chat_id = update.effective_chat.id
-	m = update.message.text.split(" ")
-	if len(m) > 1 and m[1] == config["password"]:
-		m = pl.minor_info()
-		await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
-	else:
-		logging.info(hide_id(chat_id) + " wanted to check a game round state...")
-		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
+	m = pl.minor_info()
+	await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 
 #Building a user or chat name...
 def build_user_name(update):
@@ -492,7 +483,7 @@ async def print_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 		keyboard = [[InlineKeyboardButton(text="Firewall", callback_data="help_firewall"),
 					InlineKeyboardButton(text="Levenshtein", callback_data="help_levenshtein")],
 					[InlineKeyboardButton(text="Menor número", callback_data="help_menor"),
-					InlineKeyboardButton(text="Promedio", callback_data="help_promedio")]]
+					InlineKeyboardButton(text="Antipreguntas", callback_data="help_antipreguntas")]]
 		reply = InlineKeyboardMarkup(keyboard)
 		await context.bot.send_message(chat_id=chat_id, text=msg.build_help_message(), reply_markup=reply, parse_mode=ParseMode.HTML)
 
@@ -538,6 +529,55 @@ async def wrong_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 		us.add_wrong_message()
 		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("wrong"), parse_mode=ParseMode.HTML)
 
+#Starting admin session...
+async def trigger_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+	chat_id = update.effective_chat.id
+	password = update.message.text.split(" ")
+	if len(password) > 1 and password[1] == config["sudo_password"]:
+		us.add_admin(0)
+		context.chat_data["admin_t"] = dt.now()
+		keyboard = [[InlineKeyboardButton(text="Ver datos", callback_data="ad_0"),
+						InlineKeyboardButton(text="Guardar datos", callback_data="ad_1")],
+						[InlineKeyboardButton(text="Menor número", callback_data="ad_2"),
+						InlineKeyboardButton(text="Antipreguntas", callback_data="ad_3")]]
+		reply = InlineKeyboardMarkup(keyboard)
+		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin"), reply_markup=reply, parse_mode=ParseMode.HTML)
+		return ADMIN
+	elif len(password) > 1 and password[1] == config["password"]:
+		us.add_admin(1)
+		context.chat_data["admin_t"] = dt.now()
+		keyboard = [[InlineKeyboardButton(text="Menor número", callback_data="ad_2"),
+						InlineKeyboardButton(text="Antipreguntas", callback_data="ad_3")]]
+		reply = InlineKeyboardMarkup(keyboard)
+		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin"), reply_markup=reply, parse_mode=ParseMode.HTML)
+		return ADMIN
+	else:
+		logging.info(hide_id(chat_id) + " wanted to start an admin session...")
+		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
+		return ConversationHandler.END
+
+#Starting minor number admin session...
+async def trigger_admin_minor(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+	chat_id = update.effective_chat.id
+	us.add_admin(2)
+	keyboard = [[InlineKeyboardButton(text="Chequear", callback_data="am_0"),
+						InlineKeyboardButton(text="Terminar", callback_data="am_1")],
+						[InlineKeyboardButton(text="Salir", callback_data="am_2")]]
+	reply = InlineKeyboardMarkup(keyboard)
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_minor"), reply_markup=reply, parse_mode=ParseMode.HTML)
+
+#Starting minor number admin session...
+async def trigger_admin_antip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+	chat_id = update.effective_chat.id
+	us.add_admin(3)
+	keyboard = [[InlineKeyboardButton(text="Siguiente", callback_data="ap_0"),
+					InlineKeyboardButton(text="Cualquiera", callback_data="ap_1")],
+					[InlineKeyboardButton(text="Chequear", callback_data="ap_2"),
+					InlineKeyboardButton(text="Terminar", callback_data="ap_3")],
+					[InlineKeyboardButton(text="Salir", callback_data="ap_4")]]
+	reply = InlineKeyboardMarkup(keyboard)
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_antip"), reply_markup=reply, parse_mode=ParseMode.HTML)
+	
 #Deciding what function to trigger after a button click...
 async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 	chat_id = update.effective_chat.id
@@ -574,6 +614,61 @@ async def conversation_button_click(update: Update, context: ContextTypes.DEFAUL
 		d = int(query.data.split("_")[1])
 		await levenshtein_hint(update, context, d)
 		return LEVENSHTEIN
+	if query.data.startswith("ad"):
+		if dt.now() - context.chat_data["admin_t"] < timedelta(minutes=1):
+			selection = int(query.data.split("_")[1])
+			if selection == 0:
+				await bot_usage(update, context)
+				return ADMIN
+			elif selection == 1:
+				await save_usage(update, context)
+				return ADMIN
+			elif selection == 2:
+				await trigger_admin_minor(update, context)
+				return ADMIN_MINOR
+			elif selection == 3:
+				await trigger_admin_antip(update, context)
+				return ADMIN_ANTIP
+		else:
+			chat_id = update.effective_chat.id
+			await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_end", get_language(chat_id)), parse_mode=ParseMode.HTML)
+			return ConversationHandler.END
+	if query.data.startswith("am"):
+		if dt.now() - context.chat_data["admin_t"] < timedelta(minutes=30):
+			selection = int(query.data.split("_")[1])
+			if selection == 0:
+				await minor_number_info(update, context)
+				return ADMIN_MINOR
+			elif selection == 1:
+				await end_minor_number(update, context)
+				return ADMIN_MINOR
+			elif selection == 2:
+				chat_id = update.effective_chat.id
+				await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_minor_end"), parse_mode=ParseMode.HTML)
+				return ConversationHandler.END
+	if query.data.startswith("ap"):
+		if dt.now() - context.chat_data["admin_t"] < timedelta(minutes=30):
+			selection = int(query.data.split("_")[1])
+			if selection == 0:
+				await minor_number_info(update, context)
+				return ADMIN_ANTIP
+			elif selection == 1:
+				await end_minor_number(update, context)
+				return ADMIN_ANTIP
+			elif selection == 2:
+				await end_minor_number(update, context)
+				return ADMIN_ANTIP
+			elif selection == 3:
+				await end_minor_number(update, context)
+				return ADMIN_ANTIP
+			elif selection == 4:
+				chat_id = update.effective_chat.id
+				await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_antip_end"), parse_mode=ParseMode.HTML)
+				return ConversationHandler.END
+		else:
+			chat_id = update.effective_chat.id
+			await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_end"), parse_mode=ParseMode.HTML)
+			return ConversationHandler.END
 
 #Sending a message to bot admin when an error occur...
 async def error_notification(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -595,26 +690,16 @@ def print_sticker_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 	print(update.message.sticker["file_id"] + ";")
 
 #Sending usage data...
-async def bot_usage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def bot_usage(update, context):
 	chat_id = update.effective_chat.id
-	m = update.message.text.split(" ")
-	if len(m) > 1 and m[1] == config["password"]:
-		m = us.build_usage_message()
-		await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
-	else:
-		logging.info(hide_id(chat_id) + " wanted to check a game round state...")
-		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
+	m = us.build_usage_message()
+	await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 
 #Saving usage data...
-async def save_usage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def save_usage(update, context):
 	chat_id = update.effective_chat.id
-	m = update.message.text.split(" ")
-	if len(m) > 1 and m[1] == config["password"]:
-		us.save_usage()
-		await context.bot.send_message(chat_id=chat_id, text="Datos guardados...", parse_mode=ParseMode.HTML)
-	else:
-		logging.info(hide_id(chat_id) + " wanted to check a game round state...")
-		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
+	us.save_usage()
+	await context.bot.send_message(chat_id=chat_id, text="¡Datos guardados!", parse_mode=ParseMode.HTML)
 
 #Hiding the first numbers of a chat id for the log...
 def hide_id(chat_id):
@@ -634,8 +719,12 @@ def build_conversation_handler():
 						CallbackQueryHandler(conversation_button_click)],
 				LEVENSHTEIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_levenshtein),
 							CallbackQueryHandler(conversation_button_click)],
+				ANTIPREGUNTAS: [],
 				ERROR_1: [MessageHandler(filters.TEXT & ~filters.COMMAND, report_command)],
-				ERROR_2: [MessageHandler(filters.TEXT & ~filters.COMMAND, report_error)]},
+				ERROR_2: [MessageHandler(filters.TEXT & ~filters.COMMAND, report_error)],
+				ADMIN: [CallbackQueryHandler(conversation_button_click)],
+				ADMIN_MINOR: [CallbackQueryHandler(conversation_button_click)],
+				ADMIN_ANTIP: [CallbackQueryHandler(conversation_button_click)]},
 				fallbacks=[MessageHandler(filters.COMMAND, cancel_challenge)],
 				per_chat=True, per_user=False, per_message=False)
 	return handler
