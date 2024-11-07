@@ -23,7 +23,7 @@ us = Usage("usage.csv", "errors.csv") #The class to store usage data...
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
 pl = Play("games.csv") #The class to let the users play some game...
-FIREWALL_L, TRYING, FIREWALL, LEVENSHTEIN, ERROR_1, ERROR_2 = range(6) #Conversation states...
+FIREWALL_L, TRYING, FIREWALL, LEVENSHTEIN, ANTIPREGUNTAS, ERROR_1, ERROR_2, ADMIN, ADMIN_MENOR, ADMIN_ANTIPREGUNTAS = range(10) #Conversation states...
 rebus_keys = ["command", "type","animated","words","solution","explanation","hint","file_id","path"] #Keys to load rebus data...
 acertijo_keys = ["command", "type","words","solution_type","statement","solution","explanation","hint"] #Keys to load acertijo data...
 firewall_keys = ["command", "type"]
@@ -35,40 +35,40 @@ translation = str.maketrans(vowelsa, vowelsb)
 
 #Starting the chat with a new user...
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
-	logging.info(hide_id(id) + " started the bot...")
+	chat_id = update.effective_chat.id
+	logging.info(hide_id(chat_id) + " started the bot...")
 	us.add_start()
 	m = msg.get_message("hello") + "\n\n" + msg.get_message("hello2")
-	await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 
 #Starting an acertijo challenge...
 async def start_acertijo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	load_challenge(context.chat_data, ass.get_acertijo_data(), acertijo_keys)
-	await context.bot.send_message(chat_id=id, text=msg.get_message("start_challenge"), parse_mode=ParseMode.HTML)
-	await context.bot.send_message(chat_id=id, text=msg.build_acertijo_message(context.chat_data["solution_type"], context.chat_data["statement"]), parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("start_challenge"), parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.build_acertijo_message(context.chat_data["solution_type"], context.chat_data["statement"]), parse_mode=ParseMode.HTML)
 	return TRYING
 
 #Starting rebus challenge...
 async def start_rebus(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	load_challenge(context.chat_data, ass.get_rebus_data(), rebus_keys)
-	await context.bot.send_message(chat_id=id, text=msg.get_message("start_challenge"), parse_mode=ParseMode.HTML)
-	await context.bot.send_message(chat_id=id, text=msg.build_rebus_message(context.chat_data["type"], context.chat_data["words"]), parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("start_challenge"), parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.build_rebus_message(context.chat_data["type"], context.chat_data["words"]), parse_mode=ParseMode.HTML)
 	try:
-		await send_image(context, context.chat_data["animated"], id, context.chat_data["file_id"])
+		await send_image(context, context.chat_data["animated"], chat_id, context.chat_data["file_id"])
 		return TRYING #Entering TRYING state if image was sent succesfully...
 	except:
 		logging.info("Error: It was imposible to send the image")
-		await context.bot.send_message(chat_id=id, text=msg.get_message("error"), parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("error"), parse_mode=ParseMode.HTML)
 		return ConversationHandler.END #Ending challenge if image was not sent...
 
 #Sending images and animations...
 async def send_image(context: ContextTypes.DEFAULT_TYPE, animated: bool, id: int, file_id: int) -> None:
 	if animated == "True":
-		await context.bot.send_animation(chat_id=id, animation=file_id)
+		await context.bot.send_animation(chat_id=chat_id, animation=file_id)
 	else:
-		await context.bot.send_photo(chat_id=id, photo=file_id)
+		await context.bot.send_photo(chat_id=chat_id, photo=file_id)
 
 #Loading challenge data to CallbackContext
 def load_challenge(chat_data, rebus, keys):
@@ -80,7 +80,7 @@ def load_challenge(chat_data, rebus, keys):
 
 #TRYING state check the answers sent by the user...
 async def check_try(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	if is_correct_answer(update.message.text, context.chat_data["solution"], int(context.chat_data["words"])):
 		await send_congrats(update, context)
 		return ConversationHandler.END #Ending challenge after user succeded...
@@ -93,9 +93,9 @@ async def check_try(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 			else:
 				keyboard = [[InlineKeyboardButton(text="Solución", callback_data="solution")]]
 			reply = InlineKeyboardMarkup(keyboard)
-			await context.bot.send_message(chat_id=id, text=msg.get_message("bad_answer"), reply_markup=reply, parse_mode=ParseMode.HTML)
+			await context.bot.send_message(chat_id=chat_id, text=msg.get_message("bad_answer"), reply_markup=reply, parse_mode=ParseMode.HTML)
 		else:
-			await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(2))
+			await context.bot.send_sticker(chat_id=chat_id, sticker=ass.get_sticker_id(2))
 			await end_challenge(update, context)
 			return ConversationHandler.END #Ending a challenge after attempts limit...
 
@@ -117,30 +117,30 @@ def is_correct_answer(message, solution, solution_words):
 
 #Sending congratulation message...
 async def send_congrats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	us.add_challenge(1, context.chat_data["command"])
 	if context.chat_data["saw_hint"] == False:
-		await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(0))
+		await context.bot.send_sticker(chat_id=chat_id, sticker=ass.get_sticker_id(0))
 	m = msg.build_congrats_message("good_answer", context.chat_data["command"])
-	await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 	context.chat_data.clear()
 
 #Sending the challenge's hint...
 async def send_hint(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	m = msg.build_hint_message(context.chat_data["hint"])
-	await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
-	await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(1))
+	await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
+	await context.bot.send_sticker(chat_id=chat_id, sticker=ass.get_sticker_id(1))
 	context.chat_data["saw_hint"] = True
 
 #Sending the solution from a challenge...
 async def send_solution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	us.add_challenge(3, context.chat_data["command"])
 	m = msg.build_solution_message(context.chat_data["solution"], context.chat_data["command"], context.chat_data["explanation"])
-	await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 	if context.chat_data["saw_hint"] == False:
-		await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(1))
+		await context.bot.send_sticker(chat_id=chat_id, sticker=ass.get_sticker_id(1))
 	context.chat_data.clear()
 
 #Ending a challenge...
@@ -161,28 +161,28 @@ async def cancel_challenge(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 #Selecting firewall difficulty and starting challenge...
 async def selecting_firewall(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	context.chat_data["command"] = "firewall"
 	keyboard = [[InlineKeyboardButton(text="Fácil", callback_data="firewall_0"),
 				InlineKeyboardButton(text="Difícil", callback_data="firewall_1"),
 				InlineKeyboardButton(text="Durísimo", callback_data="firewall_2")]]
 	reply = InlineKeyboardMarkup(keyboard)
-	await context.bot.send_message(chat_id=id, text=msg.get_message("present_firewall"), reply_markup=reply, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("present_firewall"), reply_markup=reply, parse_mode=ParseMode.HTML)
 	return FIREWALL_L
 
 #Starting a firewall game round...
 async def start_firewall(update: Update, context: ContextTypes.DEFAULT_TYPE, difficulty: int) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	load_firewall(context.chat_data, difficulty)
 	m = msg.build_start_firewall_message(context.chat_data["ex_pass"], context.chat_data["ex_notpass"])
 	keyboard = [[InlineKeyboardButton(text="Pista", callback_data="fw_0"),
 				InlineKeyboardButton(text="Solución", callback_data="fw_1")]]
 	reply = InlineKeyboardMarkup(keyboard)
-	await context.bot.send_message(chat_id=id, text=m, reply_markup=reply, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=m, reply_markup=reply, parse_mode=ParseMode.HTML)
 
 #Checking a firewall move...
 async def check_firewall(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	input = update.message.text.lower().translate(translation)
 	if input not in context.chat_data["moves"]:
 		success = trough_firewall(input, context.chat_data)
@@ -192,7 +192,7 @@ async def check_firewall(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 		else:
 			context.chat_data["attempts"] -= 1
 		m = msg.answer_firewall_message(success, input, context.chat_data["success"], context.chat_data["attempts"])
-		await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 		if context.chat_data["success"] == firewall_limits[0]:
 			await end_firewall_game(update, context, True)
 			return ConversationHandler.END
@@ -209,8 +209,8 @@ def trough_firewall(message, chat_data):
 
 #Ending a firewall game...
 async def end_firewall_game(update: Update, context: ContextTypes.DEFAULT_TYPE, victory: bool) -> None:
-	id = update.effective_chat.id
-	logging.info(hide_id(id) + " ended a firewall game: " + str(victory))
+	chat_id = update.effective_chat.id
+	logging.info(hide_id(chat_id) + " ended a firewall game: " + str(victory))
 	m = msg.end_firewall_message(victory, context.chat_data["command"])
 	u = None
 	if victory:
@@ -220,17 +220,17 @@ async def end_firewall_game(update: Update, context: ContextTypes.DEFAULT_TYPE, 
 		sticker = ass.get_sticker_id(2)
 		u = 2
 	us.add_challenge(u, context.chat_data["command"])
-	await context.bot.send_sticker(chat_id=id, sticker=sticker)
-	await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	await context.bot.send_sticker(chat_id=chat_id, sticker=sticker)
+	await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 	context.chat_data.clear()
 
 #Ending a firewall game because the user cheated...
 async def firewall_cheat_detected(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	us.add_challenge(3, context.chat_data["command"])
-	logging.info(hide_id(id) + " ended a firewall game: CHEAT")
-	await context.bot.send_message(chat_id=id, text=msg.get_message("firewall_cheat"), parse_mode=ParseMode.HTML)
-	await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(3))
+	logging.info(hide_id(chat_id) + " ended a firewall game: CHEAT")
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("firewall_cheat"), parse_mode=ParseMode.HTML)
+	await context.bot.send_sticker(chat_id=chat_id, sticker=ass.get_sticker_id(3))
 	context.chat_data.clear()
 
 #Loading firewall round data...
@@ -247,31 +247,31 @@ def load_firewall(chat_data, difficulty):
 
 #Sending a firewall hint...
 async def firewall_hint(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	context.chat_data["saw_hint"] = True
 	m = msg.hint_firewall_message(context.chat_data["hint"])
-	await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
-	await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(1))
+	await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
+	await context.bot.send_sticker(chat_id=chat_id, sticker=ass.get_sticker_id(1))
 	return FIREWALL
 
 #Sending a firewall solution...
 async def firewall_solution(update: Update, context: ContextTypes.DEFAULT_TYPE)-> int:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	m = msg.solution_firewall_message(context.chat_data["solution"])
-	await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 	if context.chat_data["saw_hint"] == False:
-		await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(1))
+		await context.bot.send_sticker(chat_id=chat_id, sticker=ass.get_sticker_id(1))
 	m = msg.end_firewall_message(False, context.chat_data["command"])
-	await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 	context.chat_data.clear()
 	return ConversationHandler.END
 
 #Starting a Levenshtein game...
 async def start_leveshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	context.chat_data["command"] = "levenshtein"
 	context.chat_data["words"] = []
-	await context.bot.send_message(chat_id=id, text=msg.get_message("start_levenshtein"), parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("start_levenshtein"), parse_mode=ParseMode.HTML)
 	await start_levenshtein_level(id, context, 1)
 	return LEVENSHTEIN
 
@@ -282,20 +282,20 @@ async def start_levenshtein_level(id: int, context: ContextTypes.DEFAULT_TYPE, l
 	keyboard = [[InlineKeyboardButton(text="Pista", callback_data="levenshtein_0"),
 				InlineKeyboardButton(text="Súper Pista", callback_data="levenshtein_1")]]
 	reply = InlineKeyboardMarkup(keyboard)
-	await context.bot.send_message(chat_id=id, text=m1, parse_mode=ParseMode.HTML)
-	await context.bot.send_message(chat_id=id, text=m2, reply_markup=reply, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=m1, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=m2, reply_markup=reply, parse_mode=ParseMode.HTML)
 
 #Checking a levenshtein move...
 async def check_levenshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	move = update.message.text.lower()
 	context.chat_data["attempts"] += 1
 	distance = pl.distance(move, context.chat_data["word"])
 	if distance == 0:
 		if context.chat_data["level"] == levenshtein_limits[1]:
-			await context.bot.send_message(chat_id=id, text=msg.levenshtein_played_words(context.chat_data["words"]), parse_mode=ParseMode.HTML)
-			await context.bot.send_message(chat_id=id, text=msg.get_message("levenshtein_final_victory"), parse_mode=ParseMode.HTML)
-			await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(0))
+			await context.bot.send_message(chat_id=chat_id, text=msg.levenshtein_played_words(context.chat_data["words"]), parse_mode=ParseMode.HTML)
+			await context.bot.send_message(chat_id=chat_id, text=msg.get_message("levenshtein_final_victory"), parse_mode=ParseMode.HTML)
+			await context.bot.send_sticker(chat_id=chat_id, sticker=ass.get_sticker_id(0))
 			us.add_levenshtein(0)
 			us.add_levenshtein(2)
 			name = build_user_name(update)
@@ -303,19 +303,19 @@ async def check_levenshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 			pl.save_levenshtein(name, context.chat_data["level"], context.chat_data["words"], context.chat_data["attempts_history"])
 			return ConversationHandler.END
 		else:
-			await context.bot.send_message(chat_id=id, text=msg.get_message("levenshtein_level_victory"), parse_mode=ParseMode.HTML)
+			await context.bot.send_message(chat_id=chat_id, text=msg.get_message("levenshtein_level_victory"), parse_mode=ParseMode.HTML)
 			await start_levenshtein_level(id, context, context.chat_data["level"] + 1)
 			us.add_levenshtein(1)
 			return LEVENSHTEIN
 	else:
 		if context.chat_data["attempts"] < context.chat_data["loose_time"]: 
 			m = msg.levenshtein_move_message(move, distance, context.chat_data["loose_time"] - context.chat_data["attempts"])
-			await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+			await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 			return LEVENSHTEIN
 		else:
-			await context.bot.send_message(chat_id=id, text=msg.levenshtein_played_words(context.chat_data["words"]), parse_mode=ParseMode.HTML)
-			await context.bot.send_message(chat_id=id, text=msg.get_message("levenshtein_final_loose"), parse_mode=ParseMode.HTML)
-			await context.bot.send_sticker(chat_id=id, sticker=ass.get_sticker_id(2))
+			await context.bot.send_message(chat_id=chat_id, text=msg.levenshtein_played_words(context.chat_data["words"]), parse_mode=ParseMode.HTML)
+			await context.bot.send_message(chat_id=chat_id, text=msg.get_message("levenshtein_final_loose"), parse_mode=ParseMode.HTML)
+			await context.bot.send_sticker(chat_id=chat_id, sticker=ass.get_sticker_id(2))
 			us.add_levenshtein(0)
 			us.add_levenshtein(3)
 			name = build_user_name(update)
@@ -324,7 +324,7 @@ async def check_levenshtein(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 #Sending a levenshtein hint...
 async def levenshtein_hint(update: Update, context: ContextTypes.DEFAULT_TYPE, hint_type: int) -> int:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	m = ""
 	if hint_type == 0:
 		if context.chat_data["letter"] == 1:
@@ -338,7 +338,7 @@ async def levenshtein_hint(update: Update, context: ContextTypes.DEFAULT_TYPE, h
 		else:
 			m = msg.levenshtein_hint_message(pl.levenshtein_hint(context.chat_data["word"]))
 		context.chat_data["hint"] += 1
-	await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 	return LEVENSHTEIN
 
 #Loading levenshtein round data...
@@ -360,14 +360,14 @@ def load_levenshtein(chat_data, level):
 
 #Sending a palindromo for the user...
 async def send_palindromo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	us.add_palindromo()
-	await context.bot.send_message(chat_id=id, text=msg.get_message("palindromo"), parse_mode=ParseMode.HTML)
-	await context.bot.send_message(chat_id=id, text=msg.italic(ass.get_palindromo()), parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("palindromo"), parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.italic(ass.get_palindromo()), parse_mode=ParseMode.HTML)
 
 #Sending a reverse number...
 async def send_reverse_number(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	in_m = update.message.text.split(" ")
 	us.add_reversible()
 	if len(in_m) > 1:
@@ -376,26 +376,26 @@ async def send_reverse_number(update: Update, context: ContextTypes.DEFAULT_TYPE
 			data = ass.get_reverse_number(n).split(";")
 			m = msg.get_message("reverse_number") + "\n\n"
 			m += msg.bold(data[1])
-			await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
-			await context.bot.send_photo(chat_id=id, photo=data[2])
+			await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
+			await context.bot.send_photo(chat_id=chat_id, photo=data[2])
 		except:
-			await context.bot.send_message(chat_id=id, text=msg.get_message("reverse_error"), parse_mode=ParseMode.HTML)
+			await context.bot.send_message(chat_id=chat_id, text=msg.get_message("reverse_error"), parse_mode=ParseMode.HTML)
 	else:
 		data = ass.get_random_reverse_number().split(";")
 		m = msg.get_message("reverse_number") + "\n\n"
 		m += msg.bold(data[1])
-		await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
-		await context.bot.send_photo(chat_id=id, photo=data[2])
+		await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
+		await context.bot.send_photo(chat_id=chat_id, photo=data[2])
 
 #Sendind a video from the youtube chanel...
 async def send_video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	us.add_video()
-	await context.bot.send_message(chat_id=id, text=msg.build_video_message(ass.get_video_data()), parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.build_video_message(ass.get_video_data()), parse_mode=ParseMode.HTML)
 
 #Using the bot to play a live game...
 async def save_minor_number(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) == 2:
 		try:
@@ -404,9 +404,9 @@ async def save_minor_number(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 				name = build_user_name(update)
 				us.add_jugarmenor()
 				if pl.save_minor_number(number, name, id): #Saving a move... Returns False if the player played before in the round...
-					await context.bot.send_message(chat_id=id, text=msg.build_minor_move_message(number, name), parse_mode=ParseMode.HTML)
+					await context.bot.send_message(chat_id=chat_id, text=msg.build_minor_move_message(number, name), parse_mode=ParseMode.HTML)
 				else:
-					await context.bot.send_message(chat_id=id, text=msg.get_message("play_double_move"), parse_mode=ParseMode.HTML)
+					await context.bot.send_message(chat_id=chat_id, text=msg.get_message("play_double_move"), parse_mode=ParseMode.HTML)
 			else:
 				await failed_minor_number(context, id)
 		except:
@@ -416,19 +416,19 @@ async def save_minor_number(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 #Notifying the user of a wrong game move...
 async def failed_minor_number(context: ContextTypes.DEFAULT_TYPE, id: int) -> None:
-	logging.info(hide_id(id) + " failed to play a minor number move...")
-	await context.bot.send_message(chat_id=id, text=msg.get_message("play_minor_number_move_error"), parse_mode=ParseMode.HTML)
+	logging.info(hide_id(chat_id) + " failed to play a minor number move...")
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("play_minor_number_move_error"), parse_mode=ParseMode.HTML)
 
 #Ending a game round...
 async def end_minor_number(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) > 1 and m[1] == config["password"]:
 		winner_exist, number, winner, winner_id = pl.end_minor_game()
-		logging.info(hide_id(id) + " ending a minor game round...")
+		logging.info(hide_id(chat_id) + " ending a minor game round...")
 		end_m = pl.minor_info() + "\n\n" + \
 				msg.build_minor_game_message(winner_exist, number, winner)
-		await context.bot.send_message(chat_id=id, text=end_m, parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=chat_id, text=end_m, parse_mode=ParseMode.HTML)
 		try:
 			if winner_exist:
 				await context.bot.send_message(chat_id=winner_id, text=msg.build_minor_victory_message(number), parse_mode=ParseMode.HTML)
@@ -445,19 +445,19 @@ async def end_minor_number(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 		pl.save_minor(winner, number)
 		pl.minor_reset()
 	else:
-		logging.info(hide_id(id) + " wanted to end a game round without the password...")
-		await context.bot.send_message(chat_id=id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
+		logging.info(hide_id(chat_id) + " wanted to end a game round without the password...")
+		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
 
 #Sending game current state...
 async def minor_number_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) > 1 and m[1] == config["password"]:
 		m = pl.minor_info()
-		await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 	else:
-		logging.info(hide_id(id) + " wanted to check a game round state...")
-		await context.bot.send_message(chat_id=id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
+		logging.info(hide_id(chat_id) + " wanted to check a game round state...")
+		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
 
 #Building a user or chat name...
 def build_user_name(update):
@@ -473,14 +473,20 @@ def build_user_name(update):
 			name = fn
 	return name
 
+#Printing privacy command...
+async def print_privacy(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+	chat_id = update.effective_chat.id
+	logging.info(str(hide_id(chat_id)) + " checked privacy policy...")
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("privacy"), parse_mode=ParseMode.HTML)
+
 #Triggering /help command...
 async def print_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) == 2:
 		selection = m[1].lower().translate(translation)
 		us.add_help(selection)
-		await context.bot.send_message(chat_id=id, text=msg.build_custom_help_message(selection), disable_web_page_preview=True, parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=chat_id, text=msg.build_custom_help_message(selection), disable_web_page_preview=True, parse_mode=ParseMode.HTML)
 	else:
 		us.add_help(None)
 		keyboard = [[InlineKeyboardButton(text="Firewall", callback_data="help_firewall"),
@@ -488,59 +494,59 @@ async def print_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 					[InlineKeyboardButton(text="Menor número", callback_data="help_menor"),
 					InlineKeyboardButton(text="Promedio", callback_data="help_promedio")]]
 		reply = InlineKeyboardMarkup(keyboard)
-		await context.bot.send_message(chat_id=id, text=msg.build_help_message(), reply_markup=reply, parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=chat_id, text=msg.build_help_message(), reply_markup=reply, parse_mode=ParseMode.HTML)
 
 #Triggering /info command...
 async def print_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	us.add_info()
-	await context.bot.send_message(chat_id=id, text=msg.build_info_message(), parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.build_info_message(), parse_mode=ParseMode.HTML)
 
 #Starting an error report session...
 async def trigger_error_submit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-	id = update.effective_chat.id
-	logging.info(str(hide_id(id)) + " wants to report an error...")
+	chat_id = update.effective_chat.id
+	logging.info(str(hide_id(chat_id)) + " wants to report an error...")
 	context.chat_data["command"] = "error"
-	await context.bot.send_message(chat_id=id, text=msg.get_message("submit_error_1"), parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("submit_error_1"), parse_mode=ParseMode.HTML)
 	return ERROR_1
 
 #Saving error related command...
 async def report_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	m = update.message.text
 	context.chat_data["error_command"] = m
-	await context.bot.send_message(chat_id=id, text=msg.get_message("submit_error_2"), parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("submit_error_2"), parse_mode=ParseMode.HTML)
 	return ERROR_2
 
 #Saving error description...
 async def report_error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	m = context.chat_data["error_command"]
 	m2 = update.message.text
 	context.chat_data["error_description"] = m2
 	us.add_error_report()
-	us.save_error_report(m, m2, str(hide_id(id)))
+	us.save_error_report(m, m2, str(hide_id(chat_id)))
 	admin_msg = "Error reported:\n-command: /" + m + "\n-description: " + m2
 	await context.bot.send_message(chat_id=config["admin_id"], text=admin_msg, parse_mode=ParseMode.HTML)
-	await context.bot.send_message(chat_id=id, text=msg.get_message("submit_error_3"), parse_mode=ParseMode.HTML)
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("submit_error_3"), parse_mode=ParseMode.HTML)
 	return ConversationHandler.END
 
 #Answering a text message out of any conversation...
 async def wrong_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 	if update.message.reply_to_message == None:
-		id = update.effective_chat.id
+		chat_id = update.effective_chat.id
 		us.add_wrong_message()
-		await context.bot.send_message(chat_id=id, text=msg.get_message("wrong"), parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("wrong"), parse_mode=ParseMode.HTML)
 
 #Deciding what function to trigger after a button click...
 async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	query = update.callback_query
 	await query.answer()
 	if query.data.startswith("help"):
 		selection = query.data.split("_")[1]
 		us.add_help(selection)
-		await context.bot.send_message(chat_id=id, text=msg.build_custom_help_message(selection), disable_web_page_preview=True, parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=chat_id, text=msg.build_custom_help_message(selection), disable_web_page_preview=True, parse_mode=ParseMode.HTML)
 
 #Deciding what function to trigger after a button click in a conversation...
 async def conversation_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -571,8 +577,8 @@ async def conversation_button_click(update: Update, context: ContextTypes.DEFAUL
 
 #Sending a message to bot admin when an error occur...
 async def error_notification(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
-	m = "An error ocurred! While comunicating with chat " + hide_id(id)
+	chat_id = update.effective_chat.id
+	m = "An error ocurred! While comunicating with chat " + hide_id(chat_id)
 	logging.info(m)
 	await context.bot.send_message(chat_id=config["admin_id"], text=m, parse_mode=ParseMode.HTML)
 
@@ -590,29 +596,29 @@ def print_sticker_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
 #Sending usage data...
 async def bot_usage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) > 1 and m[1] == config["password"]:
 		m = us.build_usage_message()
-		await context.bot.send_message(chat_id=id, text=m, parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 	else:
-		logging.info(hide_id(id) + " wanted to check a game round state...")
-		await context.bot.send_message(chat_id=id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
+		logging.info(hide_id(chat_id) + " wanted to check a game round state...")
+		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
 
 #Saving usage data...
 async def save_usage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-	id = update.effective_chat.id
+	chat_id = update.effective_chat.id
 	m = update.message.text.split(" ")
 	if len(m) > 1 and m[1] == config["password"]:
 		us.save_usage()
-		await context.bot.send_message(chat_id=id, text="Datos guardados...", parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=chat_id, text="Datos guardados...", parse_mode=ParseMode.HTML)
 	else:
-		logging.info(hide_id(id) + " wanted to check a game round state...")
-		await context.bot.send_message(chat_id=id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
+		logging.info(hide_id(chat_id) + " wanted to check a game round state...")
+		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("intruder"), parse_mode=ParseMode.HTML)
 
 #Hiding the first numbers of a chat id for the log...
-def hide_id(id):
-	s = str(id)
+def hide_id(chat_id):
+	s = str(chat_id)
 	return "****" + s[len(s)-4:]
 
 #Building the conversation handler...
@@ -620,7 +626,7 @@ def build_conversation_handler():
 	handler = ConversationHandler(
 		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("acertijo", start_acertijo),
 					CommandHandler("firewall", selecting_firewall), CommandHandler("levenshtein", start_leveshtein),
-					CommandHandler("error", trigger_error_submit)],
+					CommandHandler("error", trigger_error_submit), CommandHandler("admin", trigger_admin)],
 		states={FIREWALL_L: [CallbackQueryHandler(conversation_button_click)],
 				TRYING:[MessageHandler(filters.TEXT & ~filters.COMMAND, check_try),
 					CallbackQueryHandler(conversation_button_click)],
@@ -651,12 +657,9 @@ def main():
 	app.add_handler(CommandHandler("reversible", send_reverse_number), group=2)
 	app.add_handler(CommandHandler("video", send_video), group=2)
 	app.add_handler(CommandHandler("jugarmenor", save_minor_number), group=2)
-	app.add_handler(CommandHandler("chequearmenor", minor_number_info), group=2)
-	app.add_handler(CommandHandler("terminarmenor", end_minor_number), group=2)
 	app.add_handler(CommandHandler("info", print_info), group=2)
 	app.add_handler(CommandHandler("help", print_help), group=2)
-	app.add_handler(CommandHandler("botusage", bot_usage), group=2)
-	app.add_handler(CommandHandler("saveusage", save_usage), group=2)
+	app.add_handler(CommandHandler("privacy", print_privacy), group=2)
 	app.add_handler(CallbackQueryHandler(button_click), group=2)
 	app.add_handler(build_conversation_handler(), group=1)
 	app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, wrong_message), group=1)
