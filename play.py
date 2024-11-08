@@ -104,6 +104,7 @@ class Play():
         self.antip_status = {"active": False, "random_q": rd.sample([i for i in range(len(self.antip_database))], len(self.antip_database)),
                             "random_mode": False, "question_count": -1, "question_n": -1, "current_q": "", "current_a": "",
                             "players_n": 0, "answers": 0, "points_avg": []}
+        self.antip_players.clear()
         self.antip_data.clear()
 
     #Starting an antiquestion game...
@@ -126,7 +127,8 @@ class Play():
         if not self.antip_status["random_mode"]:
             self.antip_load_question((self.antip_status["question_n"] + 1)%len(self.antip_database))
         else:
-            self.antip_load_question((self.antip_status["random_q"][(self.antip_status["question_n"] + 1)%len(self.antip_database)]))
+            print((self.antip_status["question_n"] + 1)%len(self.antip_database))
+            self.antip_load_question((self.antip_status["random_q"][(self.antip_status["question_count"])%len(self.antip_database)]))
 
     #Suscribing a player to antiquestion game...
     def add_new_antip_player(self, chat_id, name):
