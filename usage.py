@@ -17,7 +17,7 @@ class Usage():
 		self.firewall = [0,0,0,0,0] #count, victory, loose, cheated, cancelled
 		self.levenshtein = [0,0,0,0,0] #count, level_victory, victory, loose, cancelled
 		self.jugarmenor = 0
-		self.jugarpromedio = 0
+		self.antip = [0,0] #players, answers
 		self.palindromo = 0
 		self.reversible = 0
 		self.video = 0
@@ -37,7 +37,7 @@ class Usage():
 			"firewall: " + str(self.firewall) + "\n" + \
 			"levenshtein: " + str(self.levenshtein) + "\n" + \
 			"jugarmenor: " + str(self.jugarmenor) + "\n" + \
-			"jugarpromedio: " + str(self.jugarpromedio) + "\n" + \
+			"antiquestions: " + str(self.antip) + "\n" + \
 			"palindromo: " + str(self.palindromo) + "\n" + \
 			"reversible: " + str(self.reversible) + "\n" + \
 			"video: " + str(self.video) + "\n" + \
@@ -71,7 +71,7 @@ class Usage():
 		line += str(self.firewall) + ";"
 		line += str(self.levenshtein) + ";"
 		line += str(self.jugarmenor) + ";"
-		line += str(self.jugarpromedio) + ";"
+		line += str(self.antip) + ";"
 		line += str(self.palindromo) + ";"
 		line += str(self.reversible) + ";"
 		line += str(self.video) + ";"
@@ -112,9 +112,9 @@ class Usage():
 	def add_jugarmenor(self):
 		self.jugarmenor += 1
 
-	#Registering a new average game move...
-	def add_jugarpromedio(self):
-		self.jugarpromedio += 1
+	#Registering a new antiquestions game move...
+	def add_antip(self, key):
+		self.antip[key] += 1
 
 	#Registering a new palindromo command...
 	def add_palindromo(self):

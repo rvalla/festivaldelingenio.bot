@@ -169,6 +169,37 @@ class Messages():
             m += "Esta ronda quedó desierta. " + self.bold(name) + " jugó " + self.bold(number) + "."
         return m
 
+    #Building antiquestion info message...
+    def build_antip_info(self, data, leaderboard):
+        m = self.bold("Partida actual de antipreguntas") + "\n"
+        m += "Jugadores: " + str(data["players_n"]) + "\n"
+        m += "Respuestas: " + str(data["answers"]) + "\n"
+        m += "Pregunta actual: " + str(data["current_q"]) + "\n"
+        m += "Puntajes: " + self.antip_points(data["points_avg"]) + "\n\n"
+        m += self.build_antip_leaderboard(leaderboard)
+        return m
+
+    #Building antiquestion points average string...
+    def antip_points(self, list):
+        m = ""
+        for p in list:
+            if not p[0] == 0: 
+                q = p[1]/p[0]
+            else:
+                q = 0
+            m += "{:0.2f}".format(q) + " "
+        return m
+
+    #Building antiquestion leaderboard message...
+    def build_antip_leaderboard(self, leaderboard):
+        m = self.bold("Partida de Antipreguntas") + "\nTabla de posiciones:\n\n"
+        for i in range(len(leaderboard)):
+            m += str(i + 1) + ". "
+            m += self.bold(leaderboard[i][0]) + " "
+            m += self.bold(str(leaderboard[i][1])) + " ("
+            m += str(leaderboard[i][2]) + ")\n"
+        return m
+
     #The message triggered with /info command...
     def build_info_message(self):
         m = "El <b>Festival del Ingenio</b> es un encuentro para aprender y divertirse con acertijos, juegos, " + \

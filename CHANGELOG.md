@@ -2,6 +2,11 @@
 
 # Festival del Ingenio Bot: changelog
 
+## 2024-11-08: v0.9.5
+
+New game **Antiquestios** is now ready (an idea by Juli Garbulsky). A new secret **/admin** command
+replace all previous secret command to improve administrators experience.  
+
 ## 2024-02-18: v0.9.2
 
 Improving **Levenshtein challenges** (number of attempts and level's word size ranges were changed).  

@@ -24,7 +24,7 @@ us = Usage("usage.csv", "errors.csv") #The class to store usage data...
 msg = Messages() #The class which knows what to say...
 ass = Assets() #The class to access the different persistent assets...
 pl = Play("games.csv") #The class to let the users play some game...
-FIREWALL_L, TRYING, FIREWALL, LEVENSHTEIN, ANTIPREGUNTAS, ERROR_1, ERROR_2, ADMIN, ADMIN_MINOR, ADMIN_ANTIP = range(10) #Conversation states...
+FIREWALL_L, TRYING, FIREWALL, LEVENSHTEIN, ANTIP, ERROR_1, ERROR_2, ADMIN, ADMIN_MINOR, ADMIN_ANTIP = range(10) #Conversation states...
 rebus_keys = ["command", "type","animated","words","solution","explanation","hint","file_id","path"] #Keys to load rebus data...
 acertijo_keys = ["command", "type","words","solution_type","statement","solution","explanation","hint"] #Keys to load acertijo data...
 firewall_keys = ["command", "type"]
@@ -106,7 +106,7 @@ def is_correct_answer(message, solution, solution_words):
 	solution = solution.lower().translate(translation) #The strings to compare haven't got special characters...
 	is_correct = False
 	if solution_words == 1:
-		input_w = input.split(" ") #Al words sent by the user will be evaluated...
+		input_w = input.split(" ") #All words sent by the user will be evaluated...
 		for w in input_w:
 			if w == solution:
 				is_correct = True
@@ -394,7 +394,7 @@ async def send_video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 	us.add_video()
 	await context.bot.send_message(chat_id=chat_id, text=msg.build_video_message(ass.get_video_data()), parse_mode=ParseMode.HTML)
 
-#Using the bot to play a live game...
+#Using the bot to play a live minor unique number game...
 async def save_minor_number(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 	chat_id = update.effective_chat.id
 	m = update.message.text.split(" ")
@@ -449,6 +449,40 @@ async def minor_number_info(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 	chat_id = update.effective_chat.id
 	m = pl.minor_info()
 	await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
+
+#Suscribing a user to an antiquestion game...
+async def trigger_antip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+	chat_id = update.effective_chat.id
+	context.chat_data["command"] = "antipreguntas"
+	if pl.antip_status["active"]:
+		us.add_antip(0)
+		name = build_user_name(update)
+		pl.add_new_antip_player(chat_id, name)
+		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("play_antip_start"), parse_mode=ParseMode.HTML)
+		await context.bot.send_message(chat_id=chat_id, text=pl.antip_status["current_q"], parse_mode=ParseMode.HTML)
+		return ANTIP
+	else:
+		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("play_antip_failed"), parse_mode=ParseMode.HTML)
+		return ConversationHandler.END
+
+#Saving a player's antiquestion answer...
+async def antip_move(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+	chat_id = update.effective_chat.id
+	if pl.antip_status["active"]:
+		if not pl.antip_status["question_n"] == pl.antip_data[chat_id]["last_q"]: 
+			us.add_antip(1)
+			is_correct = is_correct_answer(update.message.text, pl.antip_status["current_a"], 1)
+			points = 0
+			if is_correct:
+				points = 1
+			pl.add_antip_move(chat_id, points)
+			await context.bot.send_message(chat_id=chat_id, text=msg.get_message("play_antip_move"), parse_mode=ParseMode.HTML)
+		else:
+			await context.bot.send_message(chat_id=chat_id, text=msg.get_message("play_antip_repeated_move"), parse_mode=ParseMode.HTML)
+		return ANTIP
+	else:
+		await context.bot.send_message(chat_id=chat_id, text=msg.get_message("play_antip_failed"), parse_mode=ParseMode.HTML)
+		return ConversationHandler.END
 
 #Building a user or chat name...
 def build_user_name(update):
@@ -533,6 +567,7 @@ async def wrong_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 async def trigger_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 	chat_id = update.effective_chat.id
 	password = update.message.text.split(" ")
+	context.chat_data["command"] = "admin"
 	if len(password) > 1 and password[1] == config["sudo_password"]:
 		us.add_admin(0)
 		context.chat_data["admin_t"] = dt.now()
@@ -570,14 +605,27 @@ async def trigger_admin_minor(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def trigger_admin_antip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 	chat_id = update.effective_chat.id
 	us.add_admin(3)
-	keyboard = [[InlineKeyboardButton(text="Siguiente", callback_data="ap_0"),
-					InlineKeyboardButton(text="Cualquiera", callback_data="ap_1")],
-					[InlineKeyboardButton(text="Chequear", callback_data="ap_2"),
-					InlineKeyboardButton(text="Terminar", callback_data="ap_3")],
-					[InlineKeyboardButton(text="Salir", callback_data="ap_4")]]
+	keyboard = [[InlineKeyboardButton(text="Comenzar (normal)", callback_data="ap_0"),
+					InlineKeyboardButton(text="Comenzar (aleatorio)", callback_data="ap_1")],
+					[InlineKeyboardButton(text="Siguiente", callback_data="ap_2"),
+					InlineKeyboardButton(text="Chequear", callback_data="ap_3")],
+					[InlineKeyboardButton(text="Terminar", callback_data="ap_4"),
+					InlineKeyboardButton(text="Salir", callback_data="ap_5"),]]
 	reply = InlineKeyboardMarkup(keyboard)
-	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_antip"), reply_markup=reply, parse_mode=ParseMode.HTML)
-	
+	await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_antip_1"), reply_markup=reply, parse_mode=ParseMode.HTML)
+
+#Sending new question to the players...
+async def antip_send_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+	for chat_id in pl.antip_players:
+		await context.bot.send_message(chat_id=chat_id, text=pl.antip_status["current_q"], parse_mode=ParseMode.HTML)
+
+#Sending new question to the players...
+async def antip_send_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+	m = msg.get_message("play_antip_end")
+	m += msg.build_antip_leaderboard(pl.get_antip_leaderboar())
+	for chat_id in pl.antip_players:
+		await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
+
 #Deciding what function to trigger after a button click...
 async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 	chat_id = update.effective_chat.id
@@ -648,20 +696,43 @@ async def conversation_button_click(update: Update, context: ContextTypes.DEFAUL
 				return ConversationHandler.END
 	if query.data.startswith("ap"):
 		if dt.now() - context.chat_data["admin_t"] < timedelta(minutes=30):
+			chat_id = update.effective_chat.id
 			selection = int(query.data.split("_")[1])
 			if selection == 0:
-				await minor_number_info(update, context)
+				if not pl.antip_status["active"]:
+					pl.antip_reset()
+					pl.antip_start(False)
+					await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_antip_2"), parse_mode=ParseMode.HTML)
+				else:
+					await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_antip_5"), parse_mode=ParseMode.HTML)
 				return ADMIN_ANTIP
 			elif selection == 1:
-				await end_minor_number(update, context)
+				if not pl.antip_status["active"]:
+					pl.antip_reset()
+					pl.antip_start(True)
+					await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_antip_2"), parse_mode=ParseMode.HTML)
+				else:
+					await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_antip_5"), parse_mode=ParseMode.HTML)
 				return ADMIN_ANTIP
 			elif selection == 2:
-				await end_minor_number(update, context)
+				pl.antip_next_question()
+				m = msg.get_message("admin_antip_4") + pl.antip_status["current_q"]
+				await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
+				await antip_send_question(update, context)
 				return ADMIN_ANTIP
 			elif selection == 3:
-				await end_minor_number(update, context)
+				m = msg.build_antip_info(pl.antip_status, pl.get_antip_leaderboar())
+				await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
 				return ADMIN_ANTIP
 			elif selection == 4:
+				m = msg.build_antip_info(pl.antip_status, pl.get_antip_leaderboar())
+				await context.bot.send_message(chat_id=chat_id, text=m, parse_mode=ParseMode.HTML)
+				await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_antip_3"), parse_mode=ParseMode.HTML)
+				await antip_send_leaderboard(update, context)
+				pl.save_antip()
+				pl.antip_status["active"] = False
+				return ADMIN_ANTIP
+			elif selection == 5:
 				chat_id = update.effective_chat.id
 				await context.bot.send_message(chat_id=chat_id, text=msg.get_message("admin_antip_end"), parse_mode=ParseMode.HTML)
 				return ConversationHandler.END
@@ -711,7 +782,8 @@ def build_conversation_handler():
 	handler = ConversationHandler(
 		entry_points=[CommandHandler("rebus", start_rebus), CommandHandler("acertijo", start_acertijo),
 					CommandHandler("firewall", selecting_firewall), CommandHandler("levenshtein", start_leveshtein),
-					CommandHandler("error", trigger_error_submit), CommandHandler("admin", trigger_admin)],
+					CommandHandler("antipreguntas", trigger_antip), CommandHandler("error", trigger_error_submit),
+					CommandHandler("admin", trigger_admin)],
 		states={FIREWALL_L: [CallbackQueryHandler(conversation_button_click)],
 				TRYING:[MessageHandler(filters.TEXT & ~filters.COMMAND, check_try),
 					CallbackQueryHandler(conversation_button_click)],
@@ -719,7 +791,7 @@ def build_conversation_handler():
 						CallbackQueryHandler(conversation_button_click)],
 				LEVENSHTEIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_levenshtein),
 							CallbackQueryHandler(conversation_button_click)],
-				ANTIPREGUNTAS: [],
+				ANTIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, antip_move)],
 				ERROR_1: [MessageHandler(filters.TEXT & ~filters.COMMAND, report_command)],
 				ERROR_2: [MessageHandler(filters.TEXT & ~filters.COMMAND, report_error)],
 				ADMIN: [CallbackQueryHandler(conversation_button_click)],

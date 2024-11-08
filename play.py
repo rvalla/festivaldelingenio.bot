@@ -13,10 +13,14 @@ class Play():
         self.minor_numbers = set() #A set with all numbers played...
         self.minor_players_moves = {} #A dictionary which maps numbers with players...
         self.minor_players_ids = set() #The set of all players in a round...
+        self.antip_status = {} #Antipreguntas state...
+        self.antip_players = [] #Players ids...
         self.antip_data = {} #All data from an Antipreguntas game...
+        self.antip_database = self.load_antip_database() #Questions and answers for atiquestion game...
         self.last_firewall = [0,0,0] #The last firewall which was sent...
         self.firewall, self.availables = self.load_firewalls() #Loading firewall database and total availables...
         self.levenshteins = self.load_levenshteins()
+        self.antip_reset()
         self.logger = logging.getLogger(__name__)
 
     #Saving a minor number move...
@@ -95,6 +99,82 @@ class Play():
         self.minor_players_moves.clear()
         self.minor_players_ids.clear()
 
+    #Getting ready for a new antiquestion game...
+    def antip_reset(self):
+        self.antip_status = {"active": False, "random_q": rd.sample([i for i in range(len(self.antip_database))], len(self.antip_database)),
+                            "random_mode": False, "question_count": -1, "question_n": -1, "current_q": "", "current_a": "",
+                            "players_n": 0, "answers": 0, "points_avg": []}
+        self.antip_data.clear()
+
+    #Starting an antiquestion game...
+    def antip_start(self, random_mode):
+        self.antip_status["active"] = True
+        self.antip_status["random_mode"] = random_mode
+        self.antip_next_question()
+
+    #Loading antiquestion question...
+    def antip_load_question(self, n):
+        question = self.antip_database[n].split(";")
+        self.antip_status["question_count"] = self.antip_status["question_count"] + 1
+        self.antip_status["question_n"] = n
+        self.antip_status["current_q"] = question[1]
+        self.antip_status["current_a"] = question[2]
+        self.antip_status["points_avg"].append([0,0])
+
+    #Loading next question...
+    def antip_next_question(self):
+        if not self.antip_status["random_mode"]:
+            self.antip_load_question((self.antip_status["question_n"] + 1)%len(self.antip_database))
+        else:
+            self.antip_load_question((self.antip_status["random_q"][(self.antip_status["question_n"] + 1)%len(self.antip_database)]))
+
+    #Suscribing a player to antiquestion game...
+    def add_new_antip_player(self, chat_id, name):
+        self.antip_data[chat_id] = {"name": name, "points": 0, "chat_id": chat_id, "answers": 0, "last_q": -1, "result_h": []}
+        self.antip_players.append(chat_id)
+        self.antip_status["players_n"] += 1
+
+    #Saving a player antiquestion move...
+    def add_antip_move(self, chat_id, points):
+        self.antip_data[chat_id]["points"] += points
+        self.antip_data[chat_id]["answers"] += 1
+        self.antip_data[chat_id]["result_h"].append(points)
+        self.antip_data[chat_id]["last_q"] = self.antip_status["question_n"]
+        self.antip_status["points_avg"][self.antip_status["question_count"]][0] += 1
+        self.antip_status["points_avg"][self.antip_status["question_count"]][1] += points
+        self.antip_status["answers"] += 1
+
+    #Getting Antiquestion leaderboard...
+    def get_antip_leaderboar(self):
+        leaderboard = []
+        for key, player in self.antip_data.items():
+            player_data = []
+            player_data.append(player["name"])
+            player_data.append(player["points"])
+            player_data.append(player["answers"])
+            leaderboard.append(player_data)
+        return sorted(leaderboard, key=lambda x:x[1], reverse=True)
+
+    #Saving antiquestion game result...
+    def save_antip(self):
+        file = open(self.output_path, "a")
+        t = dt.datetime.now()
+        line = str(t.year) + "-" + str(t.month) + "-" + str(t.day) + ";"
+        line += "antiquestions;"
+        line += str(str(self.antip_status["random_mode"])) + ";"
+        line += str(str(self.antip_status["question_count"])) + ";"
+        line += str(str(self.antip_status["players_n"])) + ";"
+        line += str(str(self.antip_status["answers"])) + ";"
+        line += str(str(self.antip_status["points_avg"])) + ";"
+        line += str(str(self.get_antip_leaderboar())) + "\n"
+        file.write(line)
+        file.close()
+    
+    #Loading antiquestion database...
+    def load_antip_database(self):
+        list = open("assets/data_antiquestion.csv", "r").readlines()
+        return list[1:]
+    
     #Deciding if a move in firewalls game is good...
     def check_firewall(self, algorithm, move, parameters=[]):
         if algorithm == 0:
